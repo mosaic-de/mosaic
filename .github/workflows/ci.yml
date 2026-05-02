@@ -1,0 +1,34 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [ main ]
+
+jobs:
+  structure:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Repository structure check
+        run: |
+          test -f README.md
+          test -f CLAUDE.md
+          test -f docs/02-components/tile-system.md
+          test -f docs/01-foundation/state-and-transitions.md
+
+  mosaic_ui:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: packages/mosaic_ui
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: 3.38.5
+      - run: flutter pub get
+      - run: dart format --output=none --set-exit-if-changed .
+      - run: flutter analyze
+      - run: flutter test
