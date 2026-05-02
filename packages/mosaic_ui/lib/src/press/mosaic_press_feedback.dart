@@ -77,10 +77,10 @@ class _MosaicPressFeedbackState extends State<MosaicPressFeedback> {
     // The wrapper tree is intentionally stable across interaction states:
     // the overlay and focus border layers are always present, just with
     // transparent paint when idle. Adding/removing wrappers based on
-    // press state would remount descendants and flicker.
-    Widget content = AnimatedContainer(
-      duration: tokens.motion.scaledPress,
-      curve: tokens.motion.standardCurve,
+    // press state would remount descendants and flicker. The decoration
+    // updates are not animated — Mosaic press feedback is instant by
+    // design; only the optional Modern scale animates.
+    Widget content = Container(
       foregroundDecoration: BoxDecoration(color: overlay),
       decoration: BoxDecoration(
         border: Border.all(color: focusBorder, width: 2),
