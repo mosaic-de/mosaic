@@ -7,6 +7,7 @@ export 'src/data/mosaic_live_source.dart';
 export 'src/grid/mosaic_grid.dart';
 export 'src/mode/mosaic_mode.dart';
 export 'src/motion/mosaic_state_switcher.dart';
+export 'src/pivot/mosaic_pivot.dart';
 export 'src/press/mosaic_press_feedback.dart';
 export 'src/state/interaction_state.dart';
 export 'src/surface/mosaic_panel.dart';
