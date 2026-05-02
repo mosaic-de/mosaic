@@ -4,17 +4,17 @@ Flutter component library for the Mosaic design system.
 
 ## Status
 
-Phase A — tokens, mode, theme. The package builds and tests pass; no UI
-components are exposed yet beyond the theme primitive.
+Tokens, theme, and the surface + press primitives are in place. The tile
+system and live data layer are next.
 
-## Phase Order
+## Roadmap
 
-1. Tokens, mode, theme  (current)
-2. Surface, press feedback
-3. State primitives (`DataState<T>`, `MosaicLiveSource<T>`)
-4. Tile, live tile, grid
-5. Motion primitives (state switcher, expand transition, pivot)
-6. Surface expansion stack, command bar
+- [x] Tokens, mode, theme
+- [x] Surface, press feedback
+- [ ] State primitives (`DataState<T>`, `MosaicLiveSource<T>`)
+- [ ] Tile, live tile, grid
+- [ ] Motion primitives (state switcher, expand transition, pivot)
+- [ ] Surface expansion stack, command bar
 
 See [`docs/01-foundation/state-and-transitions.md`](../../docs/01-foundation/state-and-transitions.md)
 for the architecture contract.
@@ -25,18 +25,21 @@ for the architecture contract.
 import 'package:flutter/widgets.dart';
 import 'package:mosaic_ui/mosaic_ui.dart';
 
-class App extends StatelessWidget {
-  const App({super.key});
+class Demo extends StatelessWidget {
+  const Demo({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MosaicTheme(
       tokens: MosaicTokens.metro(),
-      child: Builder(
-        builder: (context) {
-          final tokens = MosaicTheme.of(context);
-          return ColoredBox(color: tokens.color.background);
-        },
+      child: Center(
+        child: MosaicPressFeedback(
+          onPressed: () {},
+          child: const MosaicSurface(
+            padding: EdgeInsets.all(16),
+            child: SizedBox(width: 120, height: 120),
+          ),
+        ),
       ),
     );
   }

@@ -1,9 +1,11 @@
 /// Mosaic UI: Flutter component library for the Mosaic design system.
-///
-/// Phase A: tokens, mode, theme.
 library;
 
 export 'src/mode/mosaic_mode.dart';
+export 'src/press/mosaic_press_feedback.dart';
+export 'src/state/interaction_state.dart';
+export 'src/surface/mosaic_surface.dart';
+export 'src/surface/mosaic_surface_kind.dart';
 export 'src/theme/mosaic_theme.dart';
 export 'src/tokens/color_tokens.dart';
 export 'src/tokens/elevation_tokens.dart';
