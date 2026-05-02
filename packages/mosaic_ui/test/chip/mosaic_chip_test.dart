@@ -31,27 +31,30 @@ void main() {
     expect(taps, 1);
   });
 
-  testWidgets('selected paints accent background', (tester) async {
+  testWidgets('selected paints accent fill', (tester) async {
     await tester.pumpWidget(
       _wrap(MosaicChip(label: 'On', selected: true, onPressed: () {})),
     );
-    final container = tester.widget<Container>(
+    final ac = tester.widget<AnimatedContainer>(
       find.byKey(const ValueKey<String>('mosaic.chip.surface')),
     );
     final tokens = MosaicTokens.metro(motionScale: 0);
-    final decoration = container.decoration! as BoxDecoration;
+    final decoration = ac.decoration! as BoxDecoration;
     expect(decoration.color, tokens.color.accent);
+    expect(decoration.border, isA<Border>());
   });
 
-  testWidgets('idle paints surfaceMuted background', (tester) async {
+  testWidgets('idle is hollow with a divider-color border', (tester) async {
     await tester.pumpWidget(
       _wrap(MosaicChip(label: 'Off', selected: false, onPressed: () {})),
     );
-    final container = tester.widget<Container>(
+    final ac = tester.widget<AnimatedContainer>(
       find.byKey(const ValueKey<String>('mosaic.chip.surface')),
     );
     final tokens = MosaicTokens.metro(motionScale: 0);
-    final decoration = container.decoration! as BoxDecoration;
-    expect(decoration.color, tokens.color.surfaceMuted);
+    final decoration = ac.decoration! as BoxDecoration;
+    expect(decoration.color, const Color(0x00000000));
+    final border = decoration.border! as Border;
+    expect(border.top.color, tokens.color.divider);
   });
 }
