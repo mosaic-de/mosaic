@@ -1,4 +1,5 @@
 import 'package:flutter/widgets.dart';
+import 'package:mosaic_ui/mosaic_ui.dart';
 
 import 'src/wallet_data.dart';
 import 'src/wallet_home.dart';
@@ -31,10 +32,9 @@ class _WalletDemoAppState extends State<WalletDemoApp> {
 
   @override
   Widget build(BuildContext context) {
-    return WidgetsApp(
+    return MosaicApp(
       title: 'Mosaic Wallet',
-      color: const Color(0xFF0B0B0C),
-      builder: (context, child) => WalletHome(data: _data),
+      builder: (context) => WalletHome(data: _data),
     );
   }
 }
