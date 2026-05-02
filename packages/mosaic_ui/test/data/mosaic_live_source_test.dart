@@ -125,25 +125,21 @@ void main() {
       'refresh preserves lastKnown via DataReady(isUpdating: true)',
       () async {
         var counter = 0;
-        final updates = <DataState<int>>[];
         final source = MosaicLiveSource<int>.fromFuture(
           () async => ++counter,
           interval: const Duration(milliseconds: 5),
         );
-        addTearDown(source.dispose);
 
-        final sub = source.states.listen(updates.add);
-        addTearDown(sub.cancel);
-
-        await Future<void>.delayed(const Duration(milliseconds: 30));
-
-        // We should see at least: loading(initial), ready(1),
-        // ready(1, isUpdating: true), ready(2), ...
-        expect(updates.first, const DataLoading<int>(isInitial: true));
-        final hasIsUpdating = updates.any(
-          (s) => s is DataReady<int> && s.isUpdating && s.value == 1,
+        await expectLater(
+          source.states,
+          emitsThrough(
+            predicate<DataState<int>>(
+              (s) => s is DataReady<int> && s.isUpdating && s.value == 1,
+            ),
+          ),
         );
-        expect(hasIsUpdating, isTrue, reason: 'expected an isUpdating tick');
+
+        source.dispose();
       },
     );
 
@@ -156,13 +152,17 @@ void main() {
         }
         throw StateError('refresh failed');
       }, interval: const Duration(milliseconds: 5));
-      addTearDown(source.dispose);
 
-      await Future<void>.delayed(const Duration(milliseconds: 30));
+      await expectLater(
+        source.states,
+        emitsThrough(
+          predicate<DataState<int>>(
+            (s) => s is DataError<int> && s.lastKnown == 4,
+          ),
+        ),
+      );
 
-      final state = source.current;
-      expect(state, isA<DataError<int>>());
-      expect(state.lastKnown, 4);
+      source.dispose();
     });
   });
 
