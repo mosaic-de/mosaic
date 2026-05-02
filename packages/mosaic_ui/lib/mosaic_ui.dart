@@ -6,6 +6,7 @@ export 'src/command/mosaic_command_bar.dart';
 export 'src/data/data_state.dart';
 export 'src/data/mosaic_live_source.dart';
 export 'src/grid/mosaic_grid.dart';
+export 'src/list/mosaic_list.dart';
 export 'src/mode/mosaic_mode.dart';
 export 'src/motion/mosaic_state_switcher.dart';
 export 'src/pivot/mosaic_pivot.dart';

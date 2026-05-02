@@ -95,48 +95,22 @@ class _ActivityPage extends StatelessWidget {
             ),
           );
         }
-        return ListView.separated(
-          padding: EdgeInsets.symmetric(vertical: tokens.spacing.sm),
+        return MosaicList.builder(
           itemCount: list.length,
-          separatorBuilder: (_, __) => Padding(
-            padding: EdgeInsets.symmetric(vertical: tokens.spacing.xs),
-            child: Container(height: 1, color: tokens.color.divider),
-          ),
-          itemBuilder: (context, i) {
+          builder: (context, i) {
             final tx = list[i];
-            return Padding(
-              padding: EdgeInsets.symmetric(vertical: tokens.spacing.xs),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          tx.label,
-                          style: tokens.typography.body.copyWith(
-                            color: tokens.color.textPrimary,
-                          ),
-                        ),
-                        Text(
-                          formatRelative(tx.when),
-                          style: tokens.typography.caption.copyWith(
-                            color: tokens.color.textSecondary,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Text(
-                    formatCents(tx.amount, withSign: true),
-                    style: tokens.typography.body.copyWith(
-                      color: tx.amount < 0
-                          ? tokens.color.textPrimary
-                          : tokens.color.success,
-                    ),
-                  ),
-                ],
+            return MosaicListRow(
+              title: tx.label,
+              subtitle: formatRelative(tx.when),
+              trailing: Text(
+                formatCents(tx.amount, withSign: true),
+                style: tokens.typography.body.copyWith(
+                  color: tx.amount < 0
+                      ? tokens.color.textPrimary
+                      : tokens.color.success,
+                ),
               ),
+              onPressed: () {},
             );
           },
         );
