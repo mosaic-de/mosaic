@@ -1,6 +1,7 @@
 /// Mosaic UI: Flutter component library for the Mosaic design system.
 library;
 
+export 'src/app/mosaic_app.dart';
 export 'src/command/mosaic_command_bar.dart';
 export 'src/data/data_state.dart';
 export 'src/data/mosaic_live_source.dart';

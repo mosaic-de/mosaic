@@ -1,0 +1,153 @@
+import 'package:flutter/widgets.dart';
+
+import '../mode/mosaic_mode.dart';
+import '../theme/mosaic_theme.dart';
+import '../tokens/mosaic_tokens.dart';
+
+/// Canonical entry point for a Mosaic application.
+///
+/// Owns the [MosaicMode] and [Brightness] state, builds the matching
+/// [MosaicTokens], and installs them via [MosaicTheme]. Exposes the
+/// mode/brightness handle to descendants through [MosaicAppScope].
+///
+/// Replaces the boilerplate of wiring `WidgetsApp + MosaicTheme +
+/// per-screen mode juggling` by hand.
+class MosaicApp extends StatefulWidget {
+  const MosaicApp({
+    super.key,
+    required this.builder,
+    this.title = '',
+    this.initialMode = MosaicMode.metro,
+    this.initialBrightness = Brightness.dark,
+    this.motionScale = 1.0,
+    this.onModeChanged,
+    this.onBrightnessChanged,
+  });
+
+  /// Called inside the [MosaicTheme] context. Build your top-level
+  /// surface here — typically a [MosaicSurfaceHost] wrapping the home
+  /// content.
+  final WidgetBuilder builder;
+
+  final String title;
+  final MosaicMode initialMode;
+  final Brightness initialBrightness;
+
+  /// Global multiplier applied to every motion duration. Tests should
+  /// pass `0` to make animations resolve immediately.
+  final double motionScale;
+
+  final ValueChanged<MosaicMode>? onModeChanged;
+  final ValueChanged<Brightness>? onBrightnessChanged;
+
+  @override
+  State<MosaicApp> createState() => _MosaicAppState();
+}
+
+class _MosaicAppState extends State<MosaicApp> {
+  late MosaicMode _mode = widget.initialMode;
+  late Brightness _brightness = widget.initialBrightness;
+
+  void _setMode(MosaicMode mode) {
+    if (mode == _mode) return;
+    setState(() => _mode = mode);
+    widget.onModeChanged?.call(mode);
+  }
+
+  void _toggleMode() {
+    _setMode(_mode == MosaicMode.metro ? MosaicMode.modern : MosaicMode.metro);
+  }
+
+  void _setBrightness(Brightness brightness) {
+    if (brightness == _brightness) return;
+    setState(() => _brightness = brightness);
+    widget.onBrightnessChanged?.call(brightness);
+  }
+
+  void _toggleBrightness() {
+    _setBrightness(
+      _brightness == Brightness.dark ? Brightness.light : Brightness.dark,
+    );
+  }
+
+  MosaicTokens _resolveTokens() {
+    return switch (_mode) {
+      MosaicMode.metro => MosaicTokens.metro(
+        brightness: _brightness,
+        motionScale: widget.motionScale,
+      ),
+      MosaicMode.modern => MosaicTokens.modern(
+        brightness: _brightness,
+        motionScale: widget.motionScale,
+      ),
+    };
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final tokens = _resolveTokens();
+    return WidgetsApp(
+      title: widget.title,
+      color: tokens.color.background,
+      builder: (context, _) {
+        return MosaicTheme(
+          tokens: tokens,
+          child: MosaicAppScope._(
+            mode: _mode,
+            brightness: _brightness,
+            setMode: _setMode,
+            toggleMode: _toggleMode,
+            setBrightness: _setBrightness,
+            toggleBrightness: _toggleBrightness,
+            child: ColoredBox(
+              color: tokens.color.background,
+              child: Builder(builder: widget.builder),
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+/// Inherited handle for reading and changing the active [MosaicMode] /
+/// [Brightness] for the nearest [MosaicApp].
+///
+/// A toggle button in a command bar reads `mode` for its label and
+/// calls `toggleMode()` on press — no callback plumbing required.
+class MosaicAppScope extends InheritedWidget {
+  const MosaicAppScope._({
+    required this.mode,
+    required this.brightness,
+    required this.setMode,
+    required this.toggleMode,
+    required this.setBrightness,
+    required this.toggleBrightness,
+    required super.child,
+  });
+
+  final MosaicMode mode;
+  final Brightness brightness;
+  final void Function(MosaicMode mode) setMode;
+  final void Function() toggleMode;
+  final void Function(Brightness brightness) setBrightness;
+  final void Function() toggleBrightness;
+
+  static MosaicAppScope of(BuildContext context) {
+    final scope = maybeOf(context);
+    assert(
+      scope != null,
+      'No MosaicApp found in context. Wrap your top-level widget in a '
+      'MosaicApp before calling MosaicAppScope.of.',
+    );
+    return scope!;
+  }
+
+  static MosaicAppScope? maybeOf(BuildContext context) {
+    return context.dependOnInheritedWidgetOfExactType<MosaicAppScope>();
+  }
+
+  @override
+  bool updateShouldNotify(MosaicAppScope oldWidget) =>
+      mode != oldWidget.mode || brightness != oldWidget.brightness;
+}
