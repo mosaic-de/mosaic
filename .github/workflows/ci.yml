@@ -31,4 +31,6 @@ jobs:
       - run: flutter pub get
       - run: dart format --output=none --set-exit-if-changed .
       - run: flutter analyze
-      - run: flutter test
+      # Goldens are committed by the host that generated them; running on
+      # a different OS fails on font/anti-aliasing diffs. Exclude here.
+      - run: flutter test --exclude-tags golden

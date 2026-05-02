@@ -1,0 +1,14 @@
+# Tag definitions for `flutter test`.
+#
+# Goldens are platform-sensitive (font rendering differs across OSes).
+# They are committed alongside the host that generated them and excluded
+# from CI by default. Regenerate after intentional visual changes with:
+#
+#     flutter test --update-goldens --tags golden
+#
+# CI runs everything except this tag:
+#
+#     flutter test --exclude-tags golden
+tags:
+  golden:
+    description: Visual snapshot tests. Host-specific.
