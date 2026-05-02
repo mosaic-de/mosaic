@@ -122,19 +122,25 @@ class _PivotHeader extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           for (var i = 0; i < pages.length; i++) ...[
-            if (i > 0) SizedBox(width: tokens.spacing.lg),
+            if (i > 0) SizedBox(width: tokens.spacing.md),
             MosaicPressFeedback(
               onPressed: () => onSelect(i),
               semanticLabel: pages[i].label,
               child: Padding(
                 padding: EdgeInsets.symmetric(vertical: tokens.spacing.xs),
-                child: Text(
-                  pages[i].label,
-                  style: tokens.typography.headline.copyWith(
-                    color: i == activeIndex
-                        ? tokens.color.textPrimary
-                        : tokens.color.textSecondary.withValues(alpha: 0.45),
-                  ),
+                child: AnimatedDefaultTextStyle(
+                  duration: tokens.motion.scaledPivot,
+                  curve: tokens.motion.standardCurve,
+                  style: i == activeIndex
+                      ? tokens.typography.headline.copyWith(
+                          color: tokens.color.textPrimary,
+                        )
+                      : tokens.typography.title.copyWith(
+                          color: tokens.color.textSecondary.withValues(
+                            alpha: 0.55,
+                          ),
+                        ),
+                  child: Text(pages[i].label),
                 ),
               ),
             ),
