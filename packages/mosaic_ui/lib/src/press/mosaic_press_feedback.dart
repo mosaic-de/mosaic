@@ -67,29 +67,27 @@ class _MosaicPressFeedbackState extends State<MosaicPressFeedback> {
       disabled: !widget.enabled,
     );
 
-    final overlay = _overlayColor(tokens, state);
+    final overlay = _overlayColor(tokens, state) ?? const Color(0x00000000);
+    final focusBorder = state.focused
+        ? tokens.color.accent
+        : const Color(0x00000000);
     final scale = _pressScale(tokens, state);
     final opacity = state.disabled ? 0.45 : 1.0;
 
-    Widget content = widget.child;
-
-    if (overlay != null) {
-      content = DecoratedBox(
-        position: DecorationPosition.foreground,
-        decoration: BoxDecoration(color: overlay),
-        child: content,
-      );
-    }
-
-    if (state.focused) {
-      content = DecoratedBox(
-        decoration: BoxDecoration(
-          border: Border.all(color: tokens.color.accent, width: 2),
-          borderRadius: BorderRadius.circular(tokens.radius.tile),
-        ),
-        child: content,
-      );
-    }
+    // The wrapper tree is intentionally stable across interaction states:
+    // the overlay and focus border layers are always present, just with
+    // transparent paint when idle. Adding/removing wrappers based on
+    // press state would remount descendants and flicker.
+    Widget content = AnimatedContainer(
+      duration: tokens.motion.scaledPress,
+      curve: tokens.motion.standardCurve,
+      foregroundDecoration: BoxDecoration(color: overlay),
+      decoration: BoxDecoration(
+        border: Border.all(color: focusBorder, width: 2),
+        borderRadius: BorderRadius.circular(tokens.radius.tile),
+      ),
+      child: widget.child,
+    );
 
     content = AnimatedScale(
       scale: scale,
