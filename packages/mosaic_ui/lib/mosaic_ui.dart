@@ -2,6 +2,7 @@
 library;
 
 export 'src/app/mosaic_app.dart';
+export 'src/button/mosaic_button.dart';
 export 'src/chip/mosaic_chip.dart';
 export 'src/command/mosaic_command_bar.dart';
 export 'src/data/data_state.dart';
@@ -16,6 +17,7 @@ export 'src/input/mosaic_toggle.dart';
 export 'src/list/mosaic_list.dart';
 export 'src/mode/mosaic_mode.dart';
 export 'src/motion/mosaic_state_switcher.dart';
+export 'src/notification/mosaic_notification_card.dart';
 export 'src/pivot/mosaic_pivot.dart';
 export 'src/press/mosaic_press_feedback.dart';
 export 'src/state/interaction_state.dart';

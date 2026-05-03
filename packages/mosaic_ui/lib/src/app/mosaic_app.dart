@@ -70,27 +70,35 @@ class _MosaicAppState extends State<MosaicApp> {
     );
   }
 
-  MosaicTokens _resolveTokens() {
+  MosaicTokens _resolveTokens(double effectiveScale) {
     return switch (_mode) {
       MosaicMode.metro => MosaicTokens.metro(
         brightness: _brightness,
-        motionScale: widget.motionScale,
+        motionScale: effectiveScale,
       ),
       MosaicMode.modern => MosaicTokens.modern(
         brightness: _brightness,
-        motionScale: widget.motionScale,
+        motionScale: effectiveScale,
       ),
     };
   }
 
   @override
   Widget build(BuildContext context) {
-    final tokens = _resolveTokens();
+    // Use the bootstrap tokens (with the configured motionScale) for
+    // the WidgetsApp's window color before MediaQuery is in scope. The
+    // inner builder re-resolves with the actual reduced-motion-aware
+    // scale and installs that as the MosaicTheme.
+    final bootstrapTokens = _resolveTokens(widget.motionScale);
     return WidgetsApp(
       title: widget.title,
-      color: tokens.color.background,
+      color: bootstrapTokens.color.background,
       debugShowCheckedModeBanner: false,
       builder: (context, _) {
+        final reduceMotion =
+            MediaQuery.maybeDisableAnimationsOf(context) ?? false;
+        final effectiveScale = reduceMotion ? 0.0 : widget.motionScale;
+        final tokens = _resolveTokens(effectiveScale);
         return MosaicTheme(
           tokens: tokens,
           child: MosaicAppScope._(
