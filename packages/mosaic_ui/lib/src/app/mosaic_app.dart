@@ -89,6 +89,7 @@ class _MosaicAppState extends State<MosaicApp> {
     return WidgetsApp(
       title: widget.title,
       color: tokens.color.background,
+      debugShowCheckedModeBanner: false,
       builder: (context, _) {
         return MosaicTheme(
           tokens: tokens,
