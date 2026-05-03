@@ -30,3 +30,9 @@ coverage/
 
 # Local agent state
 .claude/
+CLAUDE.md
+
+# Apps and examples are split into their own repos. Keep them on disk
+# for local iteration but don't track them in the main mosaic repo.
+apps/
+examples/
