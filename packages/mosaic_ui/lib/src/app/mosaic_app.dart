@@ -85,36 +85,46 @@ class _MosaicAppState extends State<MosaicApp> {
 
   @override
   Widget build(BuildContext context) {
-    // Use the bootstrap tokens (with the configured motionScale) for
-    // the WidgetsApp's window color before MediaQuery is in scope. The
-    // inner builder re-resolves with the actual reduced-motion-aware
-    // scale and installs that as the MosaicTheme.
+    // Bootstrap tokens (with the configured motionScale) drive the
+    // WidgetsApp's window color before MediaQuery is in scope. Inside
+    // the home subtree we re-resolve with the actual reduced-motion-aware
+    // scale and install that as the MosaicTheme. Using `home:` (not
+    // `builder:`) is what triggers WidgetsApp to create a default
+    // Navigator — without it, PopScope inside the surface stack has
+    // nothing to attach to and Android's hardware back exits the app.
     final bootstrapTokens = _resolveTokens(widget.motionScale);
     return WidgetsApp(
       title: widget.title,
       color: bootstrapTokens.color.background,
       debugShowCheckedModeBanner: false,
-      builder: (context, _) {
-        final reduceMotion =
-            MediaQuery.maybeDisableAnimationsOf(context) ?? false;
-        final effectiveScale = reduceMotion ? 0.0 : widget.motionScale;
-        final tokens = _resolveTokens(effectiveScale);
-        return MosaicTheme(
-          tokens: tokens,
-          child: MosaicAppScope._(
-            mode: _mode,
-            brightness: _brightness,
-            setMode: _setMode,
-            toggleMode: _toggleMode,
-            setBrightness: _setBrightness,
-            toggleBrightness: _toggleBrightness,
-            child: ColoredBox(
-              color: tokens.color.background,
-              child: Builder(builder: widget.builder),
-            ),
+      pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) =>
+          PageRouteBuilder<T>(
+            settings: settings,
+            pageBuilder: (context, _, _) => builder(context),
           ),
-        );
-      },
+      home: Builder(
+        builder: (context) {
+          final reduceMotion =
+              MediaQuery.maybeDisableAnimationsOf(context) ?? false;
+          final effectiveScale = reduceMotion ? 0.0 : widget.motionScale;
+          final tokens = _resolveTokens(effectiveScale);
+          return MosaicTheme(
+            tokens: tokens,
+            child: MosaicAppScope._(
+              mode: _mode,
+              brightness: _brightness,
+              setMode: _setMode,
+              toggleMode: _toggleMode,
+              setBrightness: _setBrightness,
+              toggleBrightness: _toggleBrightness,
+              child: ColoredBox(
+                color: tokens.color.background,
+                child: Builder(builder: widget.builder),
+              ),
+            ),
+          );
+        },
+      ),
     );
   }
 }

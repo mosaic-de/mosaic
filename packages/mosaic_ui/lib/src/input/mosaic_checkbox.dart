@@ -72,13 +72,13 @@ class _Box extends StatelessWidget {
     final fill = value ? tokens.color.accent : tokens.color.surface;
     final border = value
         ? tokens.color.accent
-        : tokens.color.textSecondary;
+        : tokens.color.textPrimary.withValues(alpha: 0.55);
     return Container(
       width: 20,
       height: 20,
       decoration: BoxDecoration(
         color: fill,
-        border: Border.all(color: border, width: 1.5),
+        border: Border.all(color: border, width: 2),
         borderRadius: BorderRadius.circular(3),
       ),
       alignment: Alignment.center,

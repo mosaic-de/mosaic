@@ -72,13 +72,13 @@ class _Dot extends StatelessWidget {
     final tokens = MosaicTheme.of(context);
     final outer = selected
         ? tokens.color.accent
-        : tokens.color.textSecondary;
+        : tokens.color.textPrimary.withValues(alpha: 0.55);
     return Container(
       width: 20,
       height: 20,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        border: Border.all(color: outer, width: 1.5),
+        border: Border.all(color: outer, width: 2),
       ),
       alignment: Alignment.center,
       child: selected
