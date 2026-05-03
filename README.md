@@ -1,17 +1,36 @@
 # Mosaic Design System
 
-Mosaic is a data-first, touch-first design system inspired by the clarity of Metro, built for Flutter, launchers, core apps, handhelds, Linux shells, and future OS targets.
+Mosaic is a data-first, touch-first design system inspired by the
+clarity of Metro, built for Flutter — launchers, core apps, handhelds,
+Linux shells, and future OS targets.
 
-Mosaic is not just a launcher skin. It is a design system for rebuilding app journeys around state, surfaces, tiles, command bars, pivots, and shallow navigation.
+Mosaic is not a launcher skin. It is a design language for rebuilding
+app journeys around **state, surfaces, tiles, command bars, pivots, and
+shallow navigation**.
 
-## Repository Goals
+## What Lives Here
 
-1. Define the Mosaic design language.
-2. Build a Flutter UI kit.
-3. Build a CLI that can scaffold and metronize Flutter apps.
-4. Build a Mosaic launcher as the reference implementation.
-5. Build core app patterns: contacts, SMS, dialer, calendar, files, settings, lock screen surfaces.
-6. Add native bridges for Android, iOS, Linux, and later experimental platforms like Fuchsia.
+This repo holds the design system and its docs:
+
+```text
+docs/                    authoritative specs
+packages/
+  mosaic_ui/             Flutter component library
+  mosaic_cli/            scaffolder + "metronizer" CLI (placeholder)
+```
+
+Apps and reference implementations live in their own repos under
+[`mosaic-de`](https://github.com/mosaic-de):
+
+| Repo | Role |
+|---|---|
+| [`mosaic-launcher`](https://github.com/mosaic-de/mosaic-launcher) | Reference launcher built on the tile system |
+| [`mosaic-wallet-ui`](https://github.com/mosaic-de/mosaic-wallet-ui) | Wallet reference UI |
+| [`mosaic-weather`](https://github.com/mosaic-de/mosaic-weather) | Weather reference app (real Open-Meteo data) |
+| [`mosaic-clock`](https://github.com/mosaic-de/mosaic-clock) | Clock app (placeholder) |
+| [`mosaic-file-manager`](https://github.com/mosaic-de/mosaic-file-manager) | File manager (placeholder) |
+
+Each app pulls `mosaic_ui` from this repo as a git dependency.
 
 ## Default Design Position
 
@@ -26,35 +45,35 @@ Mosaic defaults to Metro-like structure:
 - Shallow navigation
 - Contextual command bars
 
-Optional visual modes can soften radius and add subtle elevation, but must not break Mosaic structure.
+Optional visual modes can soften radius and add subtle elevation but
+must not break Mosaic structure.
 
 ## Quick Start for Contributors
 
-Read these first:
+Start with these documents in order:
 
 1. [`docs/00-overview/product-vision.md`](docs/00-overview/product-vision.md)
 2. [`docs/01-foundation/design-principles.md`](docs/01-foundation/design-principles.md)
-3. [`docs/02-components/tile-system.md`](docs/02-components/tile-system.md)
-4. [`docs/05-roadmap/roadmap.md`](docs/05-roadmap/roadmap.md)
-5. [`CLAUDE.md`](CLAUDE.md)
+3. [`docs/01-foundation/state-and-transitions.md`](docs/01-foundation/state-and-transitions.md)
+4. [`docs/02-components/tile-system.md`](docs/02-components/tile-system.md)
+5. [`docs/05-roadmap/roadmap.md`](docs/05-roadmap/roadmap.md)
 
-## Monorepo Layout
+Working in `packages/mosaic_ui`:
 
-```text
-mosaic-design-system/
-  docs/
-  packages/
-    mosaic_ui/
-    mosaic_cli/
-    mosaic_native_android/
-    mosaic_native_ios/
-    mosaic_native_linux/
-  apps/
-    mosaic_launcher/
-    core/
-  examples/
+```bash
+cd packages/mosaic_ui
+flutter pub get
+flutter analyze
+flutter test --exclude-tags golden     # everything except snapshots
+flutter test --tags golden             # snapshots only
+flutter test --update-goldens --tags golden   # regenerate snapshots
 ```
+
+CI runs `flutter analyze`, `flutter test --exclude-tags golden`, and
+`dart format --set-exit-if-changed .` on every PR. Goldens are
+host-specific and excluded from CI by design.
 
 ## Build Philosophy
 
-Design first. Then components. Then launcher. Then core apps. Then native bridges.
+Design first. Then components. Then launcher. Then core apps. Then
+native bridges.
