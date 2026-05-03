@@ -28,6 +28,9 @@ coverage/
 *.freezed.dart
 *.mocks.dart
 
+# Golden test diffs (created by failed runs, regenerated each time)
+**/test/goldens/failures/
+
 # Local agent state
 .claude/
 CLAUDE.md
