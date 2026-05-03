@@ -19,18 +19,17 @@ packages/
   mosaic_cli/            scaffolder + "metronizer" CLI (placeholder)
 ```
 
-Apps and reference implementations live in their own repos under
+Reference implementations live in their own repos under
 [`mosaic-de`](https://github.com/mosaic-de):
 
 | Repo | Role |
 |---|---|
-| [`mosaic-launcher`](https://github.com/mosaic-de/mosaic-launcher) | Reference launcher built on the tile system |
 | [`mosaic-wallet-ui`](https://github.com/mosaic-de/mosaic-wallet-ui) | Wallet reference UI |
 | [`mosaic-weather`](https://github.com/mosaic-de/mosaic-weather) | Weather reference app (real Open-Meteo data) |
-| [`mosaic-clock`](https://github.com/mosaic-de/mosaic-clock) | Clock app (placeholder) |
-| [`mosaic-file-manager`](https://github.com/mosaic-de/mosaic-file-manager) | File manager (placeholder) |
 
-Each app pulls `mosaic_ui` from this repo as a git dependency.
+Ecosystem apps and the launcher are developed as separate, currently
+private repos under the same org and will open up as they ship. Each
+public app pulls `mosaic_ui` from this repo as a git dependency.
 
 ## Default Design Position
 
