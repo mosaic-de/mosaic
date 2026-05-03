@@ -66,11 +66,14 @@ class _MosaicSliderState extends State<MosaicSlider> {
               child: Stack(
                 alignment: Alignment.centerLeft,
                 children: [
-                  // Track
+                  // Track — visible across both modes via alpha-tinted
+                  // textSecondary (divider is too low-contrast).
                   Container(
                     height: 4,
                     decoration: BoxDecoration(
-                      color: tokens.color.divider,
+                      color: tokens.color.textSecondary.withValues(
+                        alpha: 0.35,
+                      ),
                       borderRadius: BorderRadius.circular(tokens.radius.pill),
                     ),
                   ),
