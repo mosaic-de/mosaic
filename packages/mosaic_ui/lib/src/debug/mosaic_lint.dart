@@ -120,20 +120,7 @@ abstract final class MosaicLintChecks {
   /// pipe it through this to confirm a custom widget has not slipped a
   /// hardcoded color past review.
   static bool isTokenColor(Color color, MosaicTokens tokens) {
-    final palette = <Color>[
-      tokens.color.background,
-      tokens.color.surface,
-      tokens.color.surfaceActive,
-      tokens.color.surfaceMuted,
-      tokens.color.textPrimary,
-      tokens.color.textSecondary,
-      tokens.color.textInverse,
-      tokens.color.accent,
-      tokens.color.error,
-      tokens.color.warning,
-      tokens.color.success,
-      tokens.color.divider,
-    ];
+    final palette = _tokenPalette(tokens);
     return palette.contains(color);
   }
 
@@ -148,4 +135,71 @@ abstract final class MosaicLintChecks {
     ];
     return values.contains(radius);
   }
+
+  /// Walk the [Element] tree under [root] and collect every
+  /// `Container`/`DecoratedBox` whose color is not in the active token
+  /// palette. The result is a list of human-readable violation
+  /// descriptions, one per offending widget.
+  ///
+  /// Useful from widget tests:
+  ///
+  /// ```dart
+  /// final violations = MosaicLintChecks.scanColors(
+  ///   tester.element(find.byType(MyScreen)),
+  ///   MosaicTheme.of(tester.element(find.byType(MyScreen))),
+  /// );
+  /// expect(violations, isEmpty);
+  /// ```
+  ///
+  /// Conservative by design: skips widgets whose color is null or the
+  /// fully-transparent zero color, so legitimate "no color" decorations
+  /// aren't flagged.
+  static List<String> scanColors(Element root, MosaicTokens tokens) {
+    final palette = _tokenPalette(tokens);
+    final violations = <String>[];
+    void visit(Element element) {
+      final widget = element.widget;
+      Color? color;
+      if (widget is Container) {
+        final decoration = widget.decoration;
+        if (decoration is BoxDecoration) {
+          color = decoration.color;
+        }
+        color ??= widget.color;
+      } else if (widget is DecoratedBox) {
+        final decoration = widget.decoration;
+        if (decoration is BoxDecoration) {
+          color = decoration.color;
+        }
+      } else if (widget is ColoredBox) {
+        color = widget.color;
+      }
+      if (color != null &&
+          color.a != 0 &&
+          !palette.contains(color)) {
+        violations.add(
+          '${widget.runtimeType} uses non-token color #${color.toARGB32().toRadixString(16)}',
+        );
+      }
+      element.visitChildren(visit);
+    }
+
+    root.visitChildren(visit);
+    return violations;
+  }
+
+  static List<Color> _tokenPalette(MosaicTokens tokens) => <Color>[
+        tokens.color.background,
+        tokens.color.surface,
+        tokens.color.surfaceActive,
+        tokens.color.surfaceMuted,
+        tokens.color.textPrimary,
+        tokens.color.textSecondary,
+        tokens.color.textInverse,
+        tokens.color.accent,
+        tokens.color.error,
+        tokens.color.warning,
+        tokens.color.success,
+        tokens.color.divider,
+      ];
 }
