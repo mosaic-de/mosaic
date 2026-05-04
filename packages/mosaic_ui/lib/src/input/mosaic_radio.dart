@@ -70,9 +70,7 @@ class _Dot extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tokens = MosaicTheme.of(context);
-    final outer = selected
-        ? tokens.color.accent
-        : tokens.color.textPrimary.withValues(alpha: 0.55);
+    final outer = selected ? tokens.color.accent : tokens.color.textPrimary;
     return Container(
       width: 20,
       height: 20,

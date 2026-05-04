@@ -70,9 +70,7 @@ class _Box extends StatelessWidget {
   Widget build(BuildContext context) {
     final tokens = MosaicTheme.of(context);
     final fill = value ? tokens.color.accent : tokens.color.surface;
-    final border = value
-        ? tokens.color.accent
-        : tokens.color.textPrimary.withValues(alpha: 0.55);
+    final border = value ? tokens.color.accent : tokens.color.textPrimary;
     return Container(
       width: 20,
       height: 20,
