@@ -49,3 +49,4 @@ export 'src/tokens/motion_tokens.dart';
 export 'src/tokens/radius_tokens.dart';
 export 'src/tokens/spacing_tokens.dart';
 export 'src/tokens/typography_tokens.dart';
+export 'src/walkthrough/mosaic_walkthrough.dart';
