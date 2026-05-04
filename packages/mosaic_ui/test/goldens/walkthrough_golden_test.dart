@@ -69,7 +69,8 @@ void main() {
           child: _StepPreview(
             step: MosaicWalkthroughStep(
               title: 'Welcome to Mosaic',
-              body: 'Tiles, surfaces, and shallow journeys. Swipe to learn more.',
+              body:
+                  'Tiles, surfaces, and shallow journeys. Swipe to learn more.',
               glyph: '◫',
             ),
           ),

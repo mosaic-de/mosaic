@@ -49,39 +49,42 @@ void main() {
     expect(find.text('first body'), findsOneWidget);
   });
 
-  testWidgets('Next on intermediate step advances; Done on last fires complete',
-      (tester) async {
-    var completed = false;
-    await tester.pumpWidget(
-      _Host(
-        onComplete: () => completed = true,
-        steps: const [
-          MosaicWalkthroughStep(title: 'A', body: 'a'),
-          MosaicWalkthroughStep(title: 'B', body: 'b'),
-        ],
-      ),
-    );
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('open'));
-    await tester.pumpAndSettle();
+  testWidgets(
+    'Next on intermediate step advances; Done on last fires complete',
+    (tester) async {
+      var completed = false;
+      await tester.pumpWidget(
+        _Host(
+          onComplete: () => completed = true,
+          steps: const [
+            MosaicWalkthroughStep(title: 'A', body: 'a'),
+            MosaicWalkthroughStep(title: 'B', body: 'b'),
+          ],
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('open'));
+      await tester.pumpAndSettle();
 
-    // Step 1: button reads "Next".
-    expect(find.text('Next'), findsOneWidget);
-    await tester.tap(find.text('Next'));
-    await tester.pumpAndSettle();
+      // Step 1: button reads "Next".
+      expect(find.text('Next'), findsOneWidget);
+      await tester.tap(find.text('Next'));
+      await tester.pumpAndSettle();
 
-    // Step 2: button reads "Done".
-    expect(find.text('Done'), findsOneWidget);
-    await tester.tap(find.text('Done'));
-    await tester.pumpAndSettle();
+      // Step 2: button reads "Done".
+      expect(find.text('Done'), findsOneWidget);
+      await tester.tap(find.text('Done'));
+      await tester.pumpAndSettle();
 
-    expect(completed, isTrue);
-    // Panel collapsed.
-    expect(find.text('A'), findsNothing);
-  });
+      expect(completed, isTrue);
+      // Panel collapsed.
+      expect(find.text('A'), findsNothing);
+    },
+  );
 
-  testWidgets('Skip on intermediate step fires onSkip and pops',
-      (tester) async {
+  testWidgets('Skip on intermediate step fires onSkip and pops', (
+    tester,
+  ) async {
     var skipped = false;
     await tester.pumpWidget(
       _Host(
@@ -108,9 +111,7 @@ void main() {
   testWidgets('Skip is hidden on the last step', (tester) async {
     await tester.pumpWidget(
       const _Host(
-        steps: [
-          MosaicWalkthroughStep(title: 'Only', body: 'only step'),
-        ],
+        steps: [MosaicWalkthroughStep(title: 'Only', body: 'only step')],
       ),
     );
     await tester.pumpAndSettle();

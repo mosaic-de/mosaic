@@ -10,6 +10,7 @@ export 'src/command/mosaic_command_bar.dart';
 export 'src/data/data_state.dart';
 export 'src/data/mosaic_live_source.dart';
 export 'src/grid/mosaic_grid.dart';
+export 'src/icon/mosaic_icon.dart';
 export 'src/input/mosaic_checkbox.dart';
 export 'src/input/mosaic_currency_input.dart';
 export 'src/input/mosaic_date_picker.dart';
