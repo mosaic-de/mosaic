@@ -66,6 +66,24 @@ abstract class MosaicLiveSource<T> {
   /// the first event, then any subsequent transitions.
   Stream<DataState<T>> get states;
 
+  /// Pause activity. Stops polling timers, pauses upstream stream
+  /// subscriptions, and detaches from listenables until [resume] is
+  /// called. The current [DataState] is preserved verbatim — consumers
+  /// keep showing the last-known value while paused.
+  ///
+  /// Idempotent: calling pause on a paused source is a no-op. Used to
+  /// stop background work for off-screen tiles or backgrounded apps.
+  void pause();
+
+  /// Resume activity. For stream sources, resumes the underlying
+  /// subscription. For polling sources, schedules the next fetch
+  /// immediately (so values do not appear stale on return). Idempotent.
+  void resume();
+
+  /// True when the source is currently paused. Defaults to false on
+  /// construction.
+  bool get isPaused;
+
   /// Release any underlying resources (timers, stream subscriptions,
   /// listener registrations).
   void dispose();
@@ -76,13 +94,41 @@ abstract class _MulticastLiveSource<T> implements MosaicLiveSource<T> {
   _MulticastLiveSource(DataState<T> initial) : _current = initial;
 
   DataState<T> _current;
+  bool _paused = false;
   final StreamController<DataState<T>> _controller =
       StreamController<DataState<T>>.broadcast(sync: true);
 
   @override
   DataState<T> get current => _current;
 
+  @override
+  bool get isPaused => _paused;
+
   bool get _isClosed => _controller.isClosed;
+
+  @override
+  void pause() {
+    if (_paused || _isClosed) return;
+    _paused = true;
+    onPause();
+  }
+
+  @override
+  void resume() {
+    if (!_paused || _isClosed) return;
+    _paused = false;
+    onResume();
+  }
+
+  /// Hook for subclasses to release/suspend their upstream work. Called
+  /// once when the source transitions from running to paused.
+  @protected
+  void onPause() {}
+
+  /// Hook for subclasses to re-attach to upstream work. Called once
+  /// when the source transitions from paused back to running.
+  @protected
+  void onResume() {}
 
   @override
   Stream<DataState<T>> get states {
@@ -155,6 +201,12 @@ class _StreamLiveSource<T> extends _MulticastLiveSource<T> {
   }
 
   @override
+  void onPause() => _sub.pause();
+
+  @override
+  void onResume() => _sub.resume();
+
+  @override
   void dispose() {
     _sub.cancel();
     super.dispose();
@@ -173,25 +225,37 @@ class _FutureLiveSource<T> extends _MulticastLiveSource<T> {
   Timer? _timer;
 
   Future<void> _runFetch() async {
+    if (isPaused || _isClosed) return;
     final lastKnown = _current.lastKnown;
     if (lastKnown != null) {
       emit(DataReady<T>(lastKnown, isUpdating: true));
     }
     try {
       final value = await _fetch();
-      if (_isClosed) return;
+      if (_isClosed || isPaused) return;
       if (isEmpty?.call(value) ?? false) {
         emit(DataEmpty<T>());
       } else {
         emit(DataReady<T>(value));
       }
     } catch (error) {
-      if (_isClosed) return;
+      if (_isClosed || isPaused) return;
       emit(DataError<T>(error, lastKnown: _current.lastKnown));
     }
-    if (interval != null && !_isClosed) {
+    if (interval != null && !_isClosed && !isPaused) {
       _timer = Timer(interval!, () => unawaited(_runFetch()));
     }
+  }
+
+  @override
+  void onPause() {
+    _timer?.cancel();
+    _timer = null;
+  }
+
+  @override
+  void onResume() {
+    if (_timer == null) unawaited(_runFetch());
   }
 
   @override
@@ -231,8 +295,18 @@ class _ListenableLiveSource<T> extends _MulticastLiveSource<T> {
   }
 
   @override
+  void onPause() => _listenable.removeListener(_onChange);
+
+  @override
+  void onResume() {
+    _listenable.addListener(_onChange);
+    // Re-sync to current value in case it changed while paused.
+    _onChange();
+  }
+
+  @override
   void dispose() {
-    _listenable.removeListener(_onChange);
+    if (!isPaused) _listenable.removeListener(_onChange);
     super.dispose();
   }
 }
