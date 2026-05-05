@@ -57,6 +57,11 @@ class MosaicDraggable<T extends Object> extends StatelessWidget {
           opacity: 0.4,
           child: IgnorePointer(child: child),
         );
+    // When the drag gesture is disabled, render the child raw — the
+    // host's own taps / long-presses on the tile must continue to
+    // work. Wrapping in AbsorbPointer (or IgnorePointer) here would
+    // dead-tile the whole grid.
+    if (!enabled) return child;
     final draggable = longPress
         ? LongPressDraggable<T>(
             data: data,
@@ -77,7 +82,6 @@ class MosaicDraggable<T extends Object> extends StatelessWidget {
             onDraggableCanceled: (_, __) => onDragCanceled?.call(),
             child: child,
           );
-    if (!enabled) return AbsorbPointer(child: child);
     // Tokens wrap so motion + brightness propagate to the feedback
     // widget which Flutter renders in an Overlay.
     return MosaicTheme(tokens: tokens, child: draggable);
