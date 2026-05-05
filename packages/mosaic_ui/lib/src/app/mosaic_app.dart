@@ -22,6 +22,7 @@ class MosaicApp extends StatefulWidget {
     this.motionScale = 1.0,
     this.onModeChanged,
     this.onBrightnessChanged,
+    this.transparentBackground = false,
   });
 
   /// Called inside the [MosaicTheme] context. Build your top-level
@@ -39,6 +40,12 @@ class MosaicApp extends StatefulWidget {
 
   final ValueChanged<MosaicMode>? onModeChanged;
   final ValueChanged<Brightness>? onBrightnessChanged;
+
+  /// When true, the app's background is rendered transparent so the
+  /// host activity's window (typically a launcher with
+  /// `windowShowWallpaper`) shows through. Defaults to false — most
+  /// apps want the token background to fill the screen.
+  final bool transparentBackground;
 
   @override
   State<MosaicApp> createState() => _MosaicAppState();
@@ -95,7 +102,9 @@ class _MosaicAppState extends State<MosaicApp> {
     final bootstrapTokens = _resolveTokens(widget.motionScale);
     return WidgetsApp(
       title: widget.title,
-      color: bootstrapTokens.color.background,
+      color: widget.transparentBackground
+          ? const Color(0x00000000)
+          : bootstrapTokens.color.background,
       debugShowCheckedModeBanner: false,
       pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) =>
           PageRouteBuilder<T>(
@@ -117,10 +126,12 @@ class _MosaicAppState extends State<MosaicApp> {
               toggleMode: _toggleMode,
               setBrightness: _setBrightness,
               toggleBrightness: _toggleBrightness,
-              child: ColoredBox(
-                color: tokens.color.background,
-                child: Builder(builder: widget.builder),
-              ),
+              child: widget.transparentBackground
+                  ? Builder(builder: widget.builder)
+                  : ColoredBox(
+                      color: tokens.color.background,
+                      child: Builder(builder: widget.builder),
+                    ),
             ),
           );
         },
