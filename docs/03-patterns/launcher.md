@@ -1,72 +1,121 @@
-# Mosaic Launcher v0.1
+# Mosaic Launcher
 
-The launcher is the first full reference app built from the Mosaic Tile System.
+The launcher is the first full reference app built from the Mosaic
+design system.
 
-## Required Features
+## Two independent axes
+
+The launcher's appearance is **two settings, not one theme list**:
 
 ```text
-Home/start surface
-Pinned tiles
-Semantic grid
-Live tile updates
-App list
-Search
-Edit/reorder mode
-Tile resizing
-Groups
-Theme mode switch
+home layout   grid | strata | ink      structure — what is on screen
+visual mode   metro | modern | aurora  skin — what it is made of
 ```
 
-## Grid
+They compose. Every layout renders correctly in every mode, because
+`MosaicTokens` keeps structure (grid, spacing, tile spans) out of the
+mode entirely. Bundling them into presets would delete real
+combinations for no benefit.
 
-Default mobile grid:
+Defaults: **grid + metro**. Both persist across cold starts;
+`main()` reads the mode before `runApp` so the first frame is already
+correct rather than flashing metro and snapping.
+
+## Home layouts
+
+### grid
+
+Semantic Metro tiles packed to fill the viewport exactly.
 
 ```text
-4 columns
-8px base spacing
-16px margin
-semantic tile spans
+Non-scrolling            the viewport is the constraint, not the content
+Fills all four edges     no ragged bottom, no dead strip
+Demotes before dropping  an oversized tile shrinks rather than vanishing
+Fills holes from usage   leftover cells get most-used apps
+No folders               a folder on home is a worse drawer
 ```
 
-## Home Surface
+`MosaicGridFit.resolve` derives columns from a ~78dp target cell, then
+picks the row count that keeps cells nearest square, then stretches
+both dimensions so the grid lands flush. `packToFit` places tiles
+row-major first-fit against that fixed canvas.
+
+Three rules earned by removing what did not work:
+
+- **Home does not scroll.** A start screen that scrolls is a list
+  wearing a grid costume. Capacity is `cols × rows`, and that is the
+  tile budget.
+- **No groups.** Category folders demoted a one-tap launch to a two-tap
+  dig through a container with worse search than the drawer that
+  already existed.
+- **Fillers are suggestions, not state.** Cells the pinned list does not
+  cover are filled from most-used apps, recomputed every build and never
+  persisted. Long-press promotes one to a real pinned tile — which is
+  how a user keeps the ones they want.
+
+Overflow is not an error: tiles that cannot be placed at any size stay
+in the drawer.
+
+### strata
+
+Vertical stack of labelled context rails — `now`, then one rail per app
+category, ranked by usage. Live data leads; app cards follow.
+
+Inherits both grid rules: nothing scrolls, including the rails. A rail
+shows as many cards as fit and no more. A horizontally scrolling row is
+a folder that forgot to close.
+
+### ink
+
+Editorial index. A pinned glance block — clock, date, unread count,
+installed count — over a typographic list of apps: pinned first, then
+everything else alphabetically, with live state as inline metadata on
+the right rail. No tiles, no icons, no surfaces; a hairline rule carries
+the hierarchy that a tile grid gets from colour.
+
+The one layout that scrolls, and only below the glance block. An index
+of 200 apps cannot be capped at a viewport and remain an index, but the
+part you *look* at still never moves — only the part you search through
+does.
+
+Only real data appears in the glance. There is no battery or weather
+row, because the surface has no channel for either, and a plausible
+number that is not real is worse than an absent one.
+
+## Widgets
+
+Built-in live tiles (clock, weather, photos, news) are placeable from a
+catalogue in edit mode, each with a set of sizes it renders well at.
+One instance per kind — `PinnedTile.id` is `builtin:<kind>`, and that id
+is what reorder and removal address.
+
+Widgets insert at the front of the tile list: a widget is glanceable
+state, and the top of the grid is where a glance lands.
+
+Not yet built: hosting third-party Android `AppWidget`s via
+`AppWidgetHost`. The catalogue is shaped so that becomes one more
+provider rather than a rewrite.
+
+## Edit mode
+
+Long-press a tile.
 
 ```text
-Greeting / time
-Live tiles
-Pinned apps
-System status tiles
-Optional groups
-```
-
-## App List
-
-Should feel like Metro:
-
-```text
-Large typography
-Alphabetical grouping
-Fast search
-No icon-grid clutter by default
-```
-
-## Edit Mode
-
-Long press activates edit mode.
-
-Supported actions:
-
-```text
-move
-resize
+move      drag to reorder
+resize    semantic sizes only
 unpin
-change tile mode
-toggle live updates
+swap      repoint a slot at a different app
+add       place a widget from the catalogue
 ```
 
-## Acceptance Criteria
+## Acceptance criteria
 
-- User can pin, unpin, move, and resize a tile.
-- Tile sizes remain semantic.
-- Launcher never creates random masonry layout.
-- Live tile can update without opening app.
-- App list can search installed apps.
+- Home never scrolls in `grid` or `strata`; in `ink` the glance block is
+  pinned and only the index scrolls.
+- The grid reaches all four edges of the viewport.
+- Tile sizes stay semantic; the launcher never produces masonry.
+- A pinned app never silently disappears — it demotes, or it falls back
+  to the drawer.
+- Layout and mode are independently selectable and both persist.
+- Live tiles update without opening an app.
+- The drawer can search every installed app.

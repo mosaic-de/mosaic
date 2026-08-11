@@ -9,11 +9,25 @@ color
 typography
 spacing
 radius
+elevation
+effect
 motion
 grid
-state
-surface
 ```
+
+### Structure vs. skin
+
+The groups split into two kinds, and the split is load-bearing:
+
+```text
+structure   spacing, grid, tile spans      — identical in every mode
+skin        color, radius, elevation,      — the mode's whole job
+            effect, motion, typography
+```
+
+A mode may only change skin tokens. Changing a structure token from a
+mode would mean switching mode reflows the screen, and the launcher's
+"home layout" and "visual mode" could no longer be independent settings.
 
 ## Example Token Shape
 
@@ -54,6 +68,32 @@ shadow: soft and minimal
 grid: still strict
 ```
 
+## Aurora Mode Defaults
+
+Layered translucent panes. The only default mode whose surfaces are not
+opaque, and therefore the only one that costs a `BackdropFilter` per
+surface — `MosaicEffectTokens.isGlass` exists so components can skip
+that work entirely in the other two modes.
+
+```text
+radius.tile: 20px
+radius.panel: 28px
+elevation.tile: 2      panel: 8      overlay: 16
+effect.surfaceBlur: 18       overlayBlur: 32
+effect.surfaceOpacity: 0.62 dark / 0.72 light
+effect.strokeWidth: 1        strokeOpacity: 0.12 dark / 0.07 light
+motion: longer, easeOutCubic
+grid: still strict — margin and gutter widen, columns do not
+```
+
+Two asymmetries are deliberate. Dark glass takes a brighter hairline
+than light glass, because on a dark backdrop a faint edge disappears and
+the pane reads as a smudge. And the gutter widens while the column count
+does not: translucent panes need air between them or their blurred edges
+bleed together, but changing columns would be a structural change and
+modes do not get to do that.
+
 ## Hard Rule
 
-Modern mode may soften Mosaic. It must never turn Mosaic into Material UI.
+Softer modes may soften Mosaic. They must never turn Mosaic into
+Material UI, and they must never change structure.

@@ -29,6 +29,10 @@ class MosaicTheme extends InheritedWidget {
         brightness: brightness,
         motionScale: motionScale,
       ),
+      MosaicMode.aurora => MosaicTokens.aurora(
+        brightness: brightness,
+        motionScale: motionScale,
+      ),
     };
     return MosaicTheme(key: key, tokens: tokens, child: child);
   }

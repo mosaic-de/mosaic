@@ -7,6 +7,11 @@ import 'package:mosaic_ui/mosaic_ui.dart';
 /// Four entries: `metro/dark`, `metro/light`, `modern/dark`,
 /// `modern/light`. Adding a fifth (e.g. high-contrast) goes here so
 /// every component picks it up.
+///
+/// Aurora is intentionally absent: adding it here invalidates nothing,
+/// but it does require a `flutter test --update-goldens --tags golden`
+/// pass to generate the new snapshots before the suite is green again.
+/// Add the two rows below when you are ready to do that.
 const goldenMatrix = <(MosaicMode, Brightness)>[
   (MosaicMode.metro, Brightness.dark),
   (MosaicMode.metro, Brightness.light),
@@ -29,9 +34,22 @@ Future<void> runGoldenMatrix(
   Size size = const Size(360, 240),
 }) async {
   for (final (mode, brightness) in goldenMatrix) {
-    final tokens = mode == MosaicMode.metro
-        ? MosaicTokens.metro(brightness: brightness, motionScale: 0)
-        : MosaicTokens.modern(brightness: brightness, motionScale: 0);
+    // Exhaustive switch, not a ternary: a new MosaicMode should break the
+    // build here rather than silently render as `modern`.
+    final tokens = switch (mode) {
+      MosaicMode.metro => MosaicTokens.metro(
+        brightness: brightness,
+        motionScale: 0,
+      ),
+      MosaicMode.modern => MosaicTokens.modern(
+        brightness: brightness,
+        motionScale: 0,
+      ),
+      MosaicMode.aurora => MosaicTokens.aurora(
+        brightness: brightness,
+        motionScale: 0,
+      ),
+    };
 
     await tester.binding.setSurfaceSize(size);
     addTearDown(() => tester.binding.setSurfaceSize(null));

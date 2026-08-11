@@ -4,6 +4,7 @@ import 'package:flutter/painting.dart';
 
 import '../mode/mosaic_mode.dart';
 import 'color_tokens.dart';
+import 'effect_tokens.dart';
 import 'elevation_tokens.dart';
 import 'grid_tokens.dart';
 import 'motion_tokens.dart';
@@ -26,6 +27,7 @@ class MosaicTokens {
     required this.motion,
     required this.grid,
     required this.typography,
+    this.effect = const MosaicEffectTokens(),
   });
 
   /// Default Metro tokens. Flat surfaces, sharp radii, snappy motion.
@@ -41,7 +43,7 @@ class MosaicTokens {
       brightness: brightness,
       color: color,
       spacing: const MosaicSpacingTokens(),
-      radius: const MosaicRadiusTokens(tile: 2, panel: 0, pill: 999, input: 2),
+      radius: const MosaicRadiusTokens(tile: 0, panel: 0, pill: 999, input: 2),
       elevation: const MosaicElevationTokens(tile: 0, panel: 0, overlay: 0),
       motion: MosaicMotionTokens(
         press: const Duration(milliseconds: 80),
@@ -92,6 +94,64 @@ class MosaicTokens {
     );
   }
 
+  /// Aurora tokens. Layered translucent panes over the backdrop: large
+  /// radii, genuine elevation, backdrop blur, hairline edges, and longer
+  /// decelerating motion.
+  ///
+  /// Aurora is the only mode whose surfaces are not opaque, so it is the
+  /// only one that costs a [BackdropFilter] per surface. Everything
+  /// structural — grid columns, tile spans, spacing scale — is unchanged
+  /// from Metro on purpose: swapping mode must never reflow a layout.
+  factory MosaicTokens.aurora({
+    Brightness brightness = Brightness.dark,
+    double motionScale = 1.0,
+  }) {
+    final color = brightness == Brightness.dark
+        ? _auroraDarkColors
+        : _auroraLightColors;
+    return MosaicTokens(
+      mode: MosaicMode.aurora,
+      brightness: brightness,
+      color: color,
+      spacing: const MosaicSpacingTokens(),
+      radius: const MosaicRadiusTokens(
+        tile: 20,
+        panel: 28,
+        pill: 999,
+        input: 14,
+      ),
+      elevation: const MosaicElevationTokens(tile: 2, panel: 8, overlay: 16),
+      effect: MosaicEffectTokens(
+        surfaceBlur: 18,
+        overlayBlur: 32,
+        surfaceOpacity: brightness == Brightness.dark ? 0.62 : 0.72,
+        overlayOpacity: brightness == Brightness.dark ? 0.80 : 0.88,
+        strokeWidth: 1,
+        // Dark glass needs a brighter edge to separate from the backdrop;
+        // light glass needs a fainter one or the hairline reads as a border.
+        strokeOpacity: brightness == Brightness.dark ? 0.12 : 0.07,
+        scrimOpacity: 0.44,
+      ),
+      motion: MosaicMotionTokens(
+        press: const Duration(milliseconds: 140),
+        update: const Duration(milliseconds: 220),
+        expand: const Duration(milliseconds: 320),
+        collapse: const Duration(milliseconds: 280),
+        pivot: const Duration(milliseconds: 300),
+        // Strong deceleration reads as weight settling — the motion
+        // counterpart of the mode's visible depth.
+        standardCurve: Curves.easeOutCubic,
+        scale: motionScale,
+      ),
+      // Wider gutters and margin: translucent panes need air between them
+      // or the blurred edges bleed into each other and the depth reads as
+      // mush. Column counts stay at the Metro values — structure is not a
+      // mode concern.
+      grid: const MosaicGridTokens(margin: 20, gutter: 12),
+      typography: _typography,
+    );
+  }
+
   final MosaicMode mode;
   final Brightness brightness;
   final MosaicColorTokens color;
@@ -101,11 +161,17 @@ class MosaicTokens {
   final MosaicMotionTokens motion;
   final MosaicGridTokens grid;
   final MosaicTypographyTokens typography;
+  final MosaicEffectTokens effect;
 
   bool get isMetro => mode == MosaicMode.metro;
   bool get isModern => mode == MosaicMode.modern;
+  bool get isAurora => mode == MosaicMode.aurora;
   bool get isDark => brightness == Brightness.dark;
   bool get isLight => brightness == Brightness.light;
+
+  /// Stable lowercase identifier for the active mode. Used by debug
+  /// overlays and by apps persisting the user's choice.
+  String get modeName => mode.name;
 
   MosaicTokens copyWith({
     MosaicMode? mode,
@@ -117,6 +183,7 @@ class MosaicTokens {
     MosaicMotionTokens? motion,
     MosaicGridTokens? grid,
     MosaicTypographyTokens? typography,
+    MosaicEffectTokens? effect,
   }) {
     return MosaicTokens(
       mode: mode ?? this.mode,
@@ -128,6 +195,7 @@ class MosaicTokens {
       motion: motion ?? this.motion,
       grid: grid ?? this.grid,
       typography: typography ?? this.typography,
+      effect: effect ?? this.effect,
     );
   }
 
@@ -143,7 +211,8 @@ class MosaicTokens {
         other.elevation == elevation &&
         other.motion == motion &&
         other.grid == grid &&
-        other.typography == typography;
+        other.typography == typography &&
+        other.effect == effect;
   }
 
   @override
@@ -157,6 +226,7 @@ class MosaicTokens {
     motion,
     grid,
     typography,
+    effect,
   );
 }
 
@@ -218,6 +288,38 @@ const MosaicColorTokens _modernLightColors = MosaicColorTokens(
   warning: Color(0xFFD97706),
   success: Color(0xFF059669),
   divider: Color(0xFFE4E4E7),
+);
+
+// Aurora leans violet rather than Metro's teal so the two modes are
+// distinguishable at a glance even in a screenshot with no chrome.
+const MosaicColorTokens _auroraDarkColors = MosaicColorTokens(
+  background: Color(0xFF08080C),
+  surface: Color(0xFF16161E),
+  surfaceActive: Color(0xFF23232E),
+  surfaceMuted: Color(0xFF101016),
+  textPrimary: Color(0xFFF7F7FA),
+  textSecondary: Color(0xFF9E9EAE),
+  textInverse: Color(0xFF08080C),
+  accent: Color(0xFF7C6CFF),
+  error: Color(0xFFFF6B6B),
+  warning: Color(0xFFFFB454),
+  success: Color(0xFF4ADE80),
+  divider: Color(0xFF2C2C38),
+);
+
+const MosaicColorTokens _auroraLightColors = MosaicColorTokens(
+  background: Color(0xFFF6F6FA),
+  surface: Color(0xFFFFFFFF),
+  surfaceActive: Color(0xFFEDEDF5),
+  surfaceMuted: Color(0xFFF0F0F6),
+  textPrimary: Color(0xFF14141A),
+  textSecondary: Color(0xFF5B5B6B),
+  textInverse: Color(0xFFFFFFFF),
+  accent: Color(0xFF5B4BD6),
+  error: Color(0xFFDC2626),
+  warning: Color(0xFFD97706),
+  success: Color(0xFF059669),
+  divider: Color(0xFFE2E2EC),
 );
 
 const MosaicTypographyTokens _typography = MosaicTypographyTokens(

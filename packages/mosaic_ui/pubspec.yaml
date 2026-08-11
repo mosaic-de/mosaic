@@ -4,7 +4,12 @@ version: 0.1.0
 publish_to: none
 
 environment:
-  sdk: ^3.10.0
+  # 3.12 is required, not merely preferred: `flutter test` compiles the
+  # framework using this package's language version, and Flutter 3.44's
+  # rendering sources use dot-shorthands (`boxHeightStyle: .max`). Pinned
+  # at ^3.10 the whole suite fails to load with an "experimental
+  # dot-shorthands feature" error from paragraph.dart.
+  sdk: ^3.12.0
   flutter: ">=3.38.0"
 
 dependencies:

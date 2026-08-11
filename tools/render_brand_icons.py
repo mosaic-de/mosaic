@@ -1,26 +1,39 @@
-"""Render Mosaic brand SVG marks to Android launcher PNGs.
+"""Render Mosaic brand marks to Android launcher icons.
 
-The SVG files in docs/brand/ all share identical geometry — only the
-hex color(s) differ. Rather than depending on an SVG renderer (we tried
-cairosvg; cairo isn't on this Windows host), this script reproduces
-the rect tessellation directly with Pillow at every Android mipmap
-size so we never have to think about rasterizers again.
+We reproduce the geometry directly with Pillow rather than depending on
+an SVG rasteriser — cairosvg needs cairo, which is not on this Windows
+host. The SVGs in docs/brand/ are the human-readable source of truth and
+must be kept in sync with the tables below by hand.
 
-Two app classes:
-  * Single-color apps (wallet, weather, clock, file_manager, main):
-    every rect uses the same RGB plus a per-rect alpha for depth.
-  * Rainbow apps (launcher): every rect carries its own RGB at full
-    opacity, mirroring docs/brand/launcher_mark.svg.
+## Why marks differ per app
+
+Every app used to share one abstract tessellation, recoloured. At 48 px
+on a home screen that made Clock and Files distinguishable only by hue,
+which defeats the point of an icon. Each app now gets geometry that says
+what it *is*, drawn in the shared language: axis-aligned rectangles,
+flat fills, no gradients, no diagonals. A mark is `base` rects in the
+app's accent (varying alpha for depth) plus `ink` rects in white on top.
+
+The launcher keeps the tessellation, since "many coloured tiles" is
+literally what it is, and gets every ecosystem accent instead of one.
+
+## Adaptive icons
+
+Android 8+ masks legacy icons into a small badge on a white plate, which
+looks broken next to modern apps. So we also emit an adaptive icon:
+
+    mipmap-anydpi-v26/ic_launcher.xml   layer declaration
+    mipmap-<dpi>/ic_launcher_foreground.png
+    values/ic_launcher_background.xml   solid background colour
+
+Adaptive foregrounds are drawn on a 108-unit canvas of which only the
+centre 66 is guaranteed visible — launchers mask to circles, squircles
+and rounded squares, and some parallax on scroll. The 96-unit mark is
+scaled to 72 and centred, putting its 84-unit artwork inside 63 units,
+comfortably within that safe zone.
 
 Usage:
     python tools/render_brand_icons.py
-
-Writes PNGs to each app's
-    android/app/src/main/res/mipmap-<dpi>/ic_launcher.png
-
-The geometry is the canonical 96x96 viewbox encoded once below; sizes
-are scaled per-DPI (mdpi=48px, hdpi=72px, xhdpi=96px, xxhdpi=144px,
-xxxhdpi=192px) per Android launcher icon guidelines.
 """
 
 from __future__ import annotations
@@ -29,8 +42,13 @@ from pathlib import Path
 
 from PIL import Image, ImageDraw
 
-# (x, y, w, h, alpha) tuples on a 96x96 grid for single-color marks.
-RECTS_TINTED = [
+# ── Mark geometry, on a 96x96 grid ────────────────────────────────────
+# base: (x, y, w, h, alpha) filled with the app accent.
+# ink:  (x, y, w, h, alpha) filled with white, painted over the base.
+
+# Generic Mosaic tessellation. Used by the design system itself and by
+# apps whose identity is "a Mosaic app" rather than a specific object.
+MOSAIC_BASE = [
     (6, 6, 40, 40, 1.00),
     (50, 6, 40, 22, 0.70),
     (50, 32, 18, 14, 0.45),
@@ -41,30 +59,74 @@ RECTS_TINTED = [
     (62, 72, 28, 18, 0.65),
 ]
 
-# (x, y, w, h, rgb) tuples for the launcher rainbow mark — every rect
-# is fully opaque, but each carries its own ecosystem accent color.
+# Clock: a four-quadrant field with hands knocked out in white. The
+# hands read 3:00 rather than the conventional 10:10 because 10:10 needs
+# diagonals, and diagonals are not in this language. Orthogonal hands
+# also survive the 48 px mdpi render without anti-aliasing mush.
+# The quadrants are deliberately gapless. An earlier version spaced them
+# like the tessellation, and the resulting white gutters ran corner to
+# corner straight through the middle — competing with the hands so the
+# whole thing read as a four-pane window. On a clock the hands must be
+# the only white on the face.
+CLOCK_BASE = [
+    (6, 6, 42, 42, 1.00),
+    (48, 6, 42, 42, 0.72),
+    (6, 48, 42, 42, 0.58),
+    (48, 48, 42, 42, 0.88),
+]
+CLOCK_INK = [
+    (42, 22, 12, 28, 1.00),  # hour hand, pointing up
+    (48, 42, 32, 12, 1.00),  # minute hand, pointing right, longer
+    # Hub sized close to the hand width. Wider than that and the joint
+    # swells into a blob that reads as a hammer head rather than a pivot.
+    (40, 40, 16, 16, 1.00),
+]
+
+# Files: folder tab plus body, with two sheets of unequal height inside.
+# The uneven sheets are what stop it reading as a plain rounded square.
+FILES_BASE = [
+    (6, 16, 36, 12, 0.72),  # tab
+    (6, 28, 84, 62, 1.00),  # body
+]
+FILES_INK = [
+    (18, 42, 30, 36, 0.92),
+    (52, 42, 26, 28, 0.55),
+]
+
+MARKS: dict[str, tuple[list, list]] = {
+    "mosaic": (MOSAIC_BASE, []),
+    "clock": (CLOCK_BASE, CLOCK_INK),
+    "files": (FILES_BASE, FILES_INK),
+}
+
+# Launcher rainbow: same tessellation, but each rect carries its own
+# ecosystem accent at full opacity.
 RECTS_RAINBOW = [
-    (6, 6, 40, 40, (0x00, 0xB7, 0xC3)),    # mosaic cyan
-    (50, 6, 40, 22, (0xF5, 0x9E, 0x0B)),   # wallet amber
+    (6, 6, 40, 40, (0x00, 0xB7, 0xC3)),  # mosaic cyan
+    (50, 6, 40, 22, (0xF5, 0x9E, 0x0B)),  # wallet amber
     (50, 32, 18, 14, (0x3B, 0x82, 0xF6)),  # weather blue
     (72, 32, 18, 14, (0x10, 0xB9, 0x81)),  # file_manager green
-    (6, 50, 22, 40, (0xEF, 0x44, 0x44)),   # clock red
+    (6, 50, 22, 40, (0xEF, 0x44, 0x44)),  # clock red
     (32, 50, 58, 18, (0xA8, 0x55, 0xF7)),  # purple
     (32, 72, 26, 18, (0xEC, 0x48, 0x99)),  # pink
     (62, 72, 28, 18, (0xF5, 0x9E, 0x0B)),  # wallet amber (echo)
 ]
 
-# Per-app config. Either a single RGB tuple (uses RECTS_TINTED) or the
-# string 'rainbow' (uses RECTS_RAINBOW).
-APP_DIRS: list[tuple[str, str | tuple[int, int, int]]] = [
-    ("examples/wallet_demo", (0xF5, 0x9E, 0x0B)),     # amber
-    ("examples/weather_demo", (0x3B, 0x82, 0xF6)),    # blue
-    ("apps/mosaic_launcher", "rainbow"),
-    ("apps/mosaic_clock", (0xEF, 0x44, 0x44)),         # red
-    ("apps/mosaic_file_manager", (0x10, 0xB9, 0x81)),  # green
+WHITE = (0xFF, 0xFF, 0xFF)
+
+# Adaptive-icon plate. Mosaic's metro dark background, so the accent
+# marks read the same way they do on the launcher's own dark surface.
+BACKGROUND_HEX = "#0B0B0C"
+
+# (path, mark name, accent rgb). "rainbow" is special-cased.
+APP_DIRS: list[tuple[str, str, tuple[int, int, int] | None]] = [
+    ("examples/wallet_demo", "mosaic", (0xF5, 0x9E, 0x0B)),
+    ("examples/weather_demo", "mosaic", (0x3B, 0x82, 0xF6)),
+    ("apps/mosaic_launcher", "rainbow", None),
+    ("apps/mosaic_clock", "clock", (0xEF, 0x44, 0x44)),
+    ("apps/mosaic_file_manager", "files", (0x10, 0xB9, 0x81)),
 ]
 
-# Android launcher icon sizes per dpi.
 DPIS = {
     "mdpi": 48,
     "hdpi": 72,
@@ -73,59 +135,130 @@ DPIS = {
     "xxxhdpi": 192,
 }
 
+# Adaptive foregrounds are authored at 108 units; Android expects the
+# same per-dpi ladder scaled from that baseline rather than from 48.
+ADAPTIVE_DPIS = {
+    "mdpi": 108,
+    "hdpi": 162,
+    "xhdpi": 216,
+    "xxhdpi": 324,
+    "xxxhdpi": 432,
+}
+
 REPO_ROOT = Path(__file__).resolve().parent.parent
 
+ADAPTIVE_XML = """<?xml version="1.0" encoding="utf-8"?>
+<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+    <background android:drawable="@color/ic_launcher_background"/>
+    <foreground android:drawable="@mipmap/ic_launcher_foreground"/>
+</adaptive-icon>
+"""
 
-def render_tinted(rgb: tuple[int, int, int], size: int) -> Image.Image:
+BACKGROUND_XML = f"""<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="ic_launcher_background">{BACKGROUND_HEX}</color>
+</resources>
+"""
+
+
+def _draw(
+    draw: ImageDraw.ImageDraw,
+    rects: list,
+    rgb: tuple[int, int, int] | None,
+    scale: float,
+    offset: float = 0.0,
+) -> None:
+    """Paint `rects` scaled onto the canvas.
+
+    When `rgb` is None each rect is expected to carry its own colour as
+    its fifth element (the rainbow case); otherwise the fifth element is
+    an alpha applied to `rgb`.
+    """
+    for rect in rects:
+        x, y, w, h = rect[0], rect[1], rect[2], rect[3]
+        last = rect[4]
+        if rgb is None:
+            fill = (*last, 255)
+        else:
+            fill = (*rgb, int(round(last * 255)))
+        x0 = int(round(x * scale + offset))
+        y0 = int(round(y * scale + offset))
+        x1 = int(round((x + w) * scale + offset))
+        y1 = int(round((y + h) * scale + offset))
+        # Pillow's rectangle is inclusive of the far edge, so pull it in
+        # by one or adjacent tiles overlap and their alphas compound
+        # into a visible seam.
+        draw.rectangle([x0, y0, x1 - 1, y1 - 1], fill=fill)
+
+
+def render_mark(
+    mark: str,
+    rgb: tuple[int, int, int] | None,
+    size: int,
+    inset: float = 0.0,
+) -> Image.Image:
+    """Render at `size` px. `inset` shrinks the 96-grid artwork to that
+    fraction of the canvas and centres it — used for adaptive safe zones.
+    """
     img = Image.new("RGBA", (size, size), (0, 0, 0, 0))
     draw = ImageDraw.Draw(img, "RGBA")
-    scale = size / 96
-    for x, y, w, h, alpha in RECTS_TINTED:
-        x0 = int(round(x * scale))
-        y0 = int(round(y * scale))
-        x1 = int(round((x + w) * scale))
-        y1 = int(round((y + h) * scale))
-        a = int(round(alpha * 255))
-        draw.rectangle([x0, y0, x1 - 1, y1 - 1], fill=(*rgb, a))
+
+    art = size if inset <= 0 else size * inset
+    scale = art / 96
+    offset = (size - art) / 2
+
+    if mark == "rainbow":
+        _draw(draw, RECTS_RAINBOW, None, scale, offset)
+        return img
+
+    base, ink = MARKS[mark]
+    _draw(draw, base, rgb, scale, offset)
+    _draw(draw, ink, WHITE, scale, offset)
     return img
 
 
-def render_rainbow(size: int) -> Image.Image:
-    img = Image.new("RGBA", (size, size), (0, 0, 0, 0))
-    draw = ImageDraw.Draw(img, "RGBA")
-    scale = size / 96
-    for x, y, w, h, rgb in RECTS_RAINBOW:
-        x0 = int(round(x * scale))
-        y0 = int(round(y * scale))
-        x1 = int(round((x + w) * scale))
-        y1 = int(round((y + h) * scale))
-        draw.rectangle([x0, y0, x1 - 1, y1 - 1], fill=(*rgb, 255))
-    return img
-
-
-def write_app(app_dir: Path, mode: str | tuple[int, int, int]) -> None:
+def write_app(
+    app_dir: Path,
+    mark: str,
+    rgb: tuple[int, int, int] | None,
+) -> None:
     res_root = app_dir / "android" / "app" / "src" / "main" / "res"
     if not res_root.exists():
         print(f"skip {app_dir.name}: no Android res root")
         return
+
     for dpi, size in DPIS.items():
         target = res_root / f"mipmap-{dpi}" / "ic_launcher.png"
         target.parent.mkdir(parents=True, exist_ok=True)
-        if mode == "rainbow":
-            img = render_rainbow(size)
-        else:
-            img = render_tinted(mode, size)
-        img.save(target, "PNG")
-        print(f"wrote {target.relative_to(REPO_ROOT)}  {size}x{size}")
+        render_mark(mark, rgb, size).save(target, "PNG")
+        print(f"  {target.relative_to(REPO_ROOT)}  {size}x{size}")
+
+    # Adaptive foreground: 96-grid mark scaled to 72 of 108 and centred.
+    for dpi, size in ADAPTIVE_DPIS.items():
+        target = res_root / f"mipmap-{dpi}" / "ic_launcher_foreground.png"
+        target.parent.mkdir(parents=True, exist_ok=True)
+        render_mark(mark, rgb, size, inset=72 / 108).save(target, "PNG")
+        print(f"  {target.relative_to(REPO_ROOT)}  {size}x{size}")
+
+    anydpi = res_root / "mipmap-anydpi-v26" / "ic_launcher.xml"
+    anydpi.parent.mkdir(parents=True, exist_ok=True)
+    anydpi.write_text(ADAPTIVE_XML, encoding="utf-8")
+    print(f"  {anydpi.relative_to(REPO_ROOT)}")
+
+    background = res_root / "values" / "ic_launcher_background.xml"
+    background.parent.mkdir(parents=True, exist_ok=True)
+    background.write_text(BACKGROUND_XML, encoding="utf-8")
+    print(f"  {background.relative_to(REPO_ROOT)}")
 
 
 def main() -> None:
-    for relative, mode in APP_DIRS:
+    for relative, mark, rgb in APP_DIRS:
         app_dir = REPO_ROOT / relative
         if not app_dir.exists():
             print(f"skip {relative}: no directory")
             continue
-        write_app(app_dir, mode)
+        print(relative)
+        write_app(app_dir, mark, rgb)
 
 
 if __name__ == "__main__":

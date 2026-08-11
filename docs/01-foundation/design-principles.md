@@ -56,7 +56,20 @@ Home → Page → Page → Page → Details → Form
 Mosaic supports controlled design modes:
 
 ```text
-Metro mode: strict, flat, sharp
-Modern mode: softer, still structured
+Metro mode:  strict, flat, sharp, opaque
+Modern mode: softer radius, subtle elevation, still opaque
+Aurora mode: translucent panes, backdrop blur, real depth
 Custom mode: token-based extension
 ```
+
+## 9. Structure Is Not a Mode
+
+A mode changes what a surface is *made of* — colour, radius, elevation,
+blur, motion. It never changes what is *on* the surface or how that is
+organised. Grid columns, spacing scale, and semantic tile spans are
+identical across every mode.
+
+This is why the launcher can offer "home layout" and "visual mode" as
+two independent settings that compose, instead of a list of bundled
+themes. The moment a mode is allowed to reflow a layout, that
+independence is gone and every new mode multiplies the work.

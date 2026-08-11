@@ -44,8 +44,22 @@ Mosaic defaults to Metro-like structure:
 - Shallow navigation
 - Contextual command bars
 
-Optional visual modes can soften radius and add subtle elevation but
-must not break Mosaic structure.
+### Modes
+
+Three visual modes ship in the box. A mode changes what a surface is
+made of; it never changes what is on the surface or how it is laid out.
+
+| Mode | Surface |
+|---|---|
+| `metro` | flat, sharp, opaque — the default |
+| `modern` | softened radius, subtle elevation, still opaque |
+| `aurora` | translucent panes, backdrop blur, hairline edges, real depth |
+
+Structure — grid columns, spacing scale, semantic tile spans — is
+identical in all three. That separation is what lets the launcher offer
+layout and mode as two independent settings rather than a list of
+bundled themes. See
+[`docs/01-foundation/design-tokens.md`](docs/01-foundation/design-tokens.md).
 
 ## Quick Start for Contributors
 

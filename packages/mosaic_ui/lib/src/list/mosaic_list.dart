@@ -1,3 +1,11 @@
+// prefer_initializing_formals fires on the two constructors below and is
+// wrong about them. `rows:` and `itemCount:` are the public parameter
+// names; the fields behind them are private because which of the two is
+// populated is an implementation detail of the named constructors. The
+// lint's fix — `this._rows` — is not expressible: Dart forbids a private
+// named parameter, so callers could not pass it at all.
+// ignore_for_file: prefer_initializing_formals
+
 import 'package:flutter/widgets.dart';
 
 import '../press/mosaic_press_feedback.dart';

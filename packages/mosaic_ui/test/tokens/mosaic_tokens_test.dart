@@ -48,6 +48,82 @@ void main() {
     });
   });
 
+  group('MosaicTokens.aurora', () {
+    test('reports isAurora and not the other modes', () {
+      final tokens = MosaicTokens.aurora();
+      expect(tokens.isAurora, isTrue);
+      expect(tokens.isMetro, isFalse);
+      expect(tokens.isModern, isFalse);
+      expect(tokens.modeName, 'aurora');
+    });
+
+    test('uses large radii, well past modern', () {
+      expect(
+        MosaicTokens.aurora().radius.tile,
+        greaterThan(MosaicTokens.modern().radius.tile),
+      );
+      expect(MosaicTokens.aurora().radius.panel, greaterThanOrEqualTo(24));
+    });
+
+    test('is the only default mode that renders as glass', () {
+      expect(MosaicTokens.aurora().effect.isGlass, isTrue);
+      expect(MosaicTokens.metro().effect.isGlass, isFalse);
+      expect(MosaicTokens.modern().effect.isGlass, isFalse);
+    });
+
+    test('asks for translucency, blur, and a hairline edge', () {
+      final effect = MosaicTokens.aurora().effect;
+      expect(effect.surfaceOpacity, lessThan(1));
+      expect(effect.surfaceBlur, greaterThan(0));
+      expect(effect.overlayBlur, greaterThan(effect.surfaceBlur));
+      expect(effect.strokeWidth, greaterThan(0));
+      expect(effect.strokeOpacity, greaterThan(0));
+    });
+
+    test('leaves structure alone — spacing and columns match metro', () {
+      final aurora = MosaicTokens.aurora();
+      final metro = MosaicTokens.metro();
+      expect(aurora.spacing, metro.spacing);
+      expect(aurora.grid.columnsMobile, metro.grid.columnsMobile);
+      expect(aurora.grid.columnsTablet, metro.grid.columnsTablet);
+      expect(aurora.grid.columnsDesktop, metro.grid.columnsDesktop);
+    });
+
+    test('motion decelerates longer than metro', () {
+      expect(
+        MosaicTokens.aurora().motion.expand.inMilliseconds,
+        greaterThan(MosaicTokens.metro().motion.expand.inMilliseconds),
+      );
+    });
+
+    test('dark and light differ in palette and edge strength', () {
+      final dark = MosaicTokens.aurora();
+      final light = MosaicTokens.aurora(brightness: Brightness.light);
+      expect(dark.color.background, isNot(light.color.background));
+      expect(
+        dark.effect.strokeOpacity,
+        greaterThan(light.effect.strokeOpacity),
+      );
+    });
+  });
+
+  group('MosaicEffectTokens', () {
+    test('defaults to the opaque metro answer', () {
+      const effect = MosaicEffectTokens();
+      expect(effect.isGlass, isFalse);
+      expect(effect.surfaceOpacity, 1.0);
+      expect(effect.surfaceBlur, 0);
+      expect(effect.strokeWidth, 0);
+    });
+
+    test('copyWith preserves untouched fields', () {
+      const base = MosaicEffectTokens(surfaceBlur: 10, strokeWidth: 2);
+      final copy = base.copyWith(surfaceBlur: 20);
+      expect(copy.surfaceBlur, 20);
+      expect(copy.strokeWidth, 2);
+    });
+  });
+
   group('motion scaling', () {
     test('motionScale 0 collapses durations to zero', () {
       final tokens = MosaicTokens.metro(motionScale: 0);

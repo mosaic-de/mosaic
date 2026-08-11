@@ -40,7 +40,7 @@ class MosaicLint extends StatelessWidget {
       return child;
     }
     return _LintBanner(
-      mode: tokens.isMetro ? 'metro' : 'modern',
+      mode: tokens.modeName,
       brightness: tokens.isDark ? 'dark' : 'light',
       child: child,
     );
@@ -69,10 +69,7 @@ class _LintBanner extends StatelessWidget {
           child: IgnorePointer(
             child: Container(
               decoration: BoxDecoration(
-                border: Border.all(
-                  color: tokens.color.warning,
-                  width: 1,
-                ),
+                border: Border.all(color: tokens.color.warning, width: 1),
               ),
             ),
           ),
@@ -174,9 +171,7 @@ abstract final class MosaicLintChecks {
       } else if (widget is ColoredBox) {
         color = widget.color;
       }
-      if (color != null &&
-          color.a != 0 &&
-          !palette.contains(color)) {
+      if (color != null && color.a != 0 && !palette.contains(color)) {
         violations.add(
           '${widget.runtimeType} uses non-token color #${color.toARGB32().toRadixString(16)}',
         );
@@ -189,17 +184,17 @@ abstract final class MosaicLintChecks {
   }
 
   static List<Color> _tokenPalette(MosaicTokens tokens) => <Color>[
-        tokens.color.background,
-        tokens.color.surface,
-        tokens.color.surfaceActive,
-        tokens.color.surfaceMuted,
-        tokens.color.textPrimary,
-        tokens.color.textSecondary,
-        tokens.color.textInverse,
-        tokens.color.accent,
-        tokens.color.error,
-        tokens.color.warning,
-        tokens.color.success,
-        tokens.color.divider,
-      ];
+    tokens.color.background,
+    tokens.color.surface,
+    tokens.color.surfaceActive,
+    tokens.color.surfaceMuted,
+    tokens.color.textPrimary,
+    tokens.color.textSecondary,
+    tokens.color.textInverse,
+    tokens.color.accent,
+    tokens.color.error,
+    tokens.color.warning,
+    tokens.color.success,
+    tokens.color.divider,
+  ];
 }

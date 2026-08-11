@@ -61,8 +61,18 @@ class _MosaicAppState extends State<MosaicApp> {
     widget.onModeChanged?.call(mode);
   }
 
+  /// Binary metro ⇄ modern flip. Deliberately does *not* include aurora:
+  /// this is the long-standing two-state toggle callers bind to a single
+  /// button, and quietly turning it into a three-state cycle would change
+  /// what that button does. Use [_cycleMode] to walk every mode.
   void _toggleMode() {
     _setMode(_mode == MosaicMode.metro ? MosaicMode.modern : MosaicMode.metro);
+  }
+
+  /// Advance to the next mode in declaration order, wrapping at the end.
+  void _cycleMode() {
+    const modes = MosaicMode.values;
+    _setMode(modes[(modes.indexOf(_mode) + 1) % modes.length]);
   }
 
   void _setBrightness(Brightness brightness) {
@@ -84,6 +94,10 @@ class _MosaicAppState extends State<MosaicApp> {
         motionScale: effectiveScale,
       ),
       MosaicMode.modern => MosaicTokens.modern(
+        brightness: _brightness,
+        motionScale: effectiveScale,
+      ),
+      MosaicMode.aurora => MosaicTokens.aurora(
         brightness: _brightness,
         motionScale: effectiveScale,
       ),
@@ -124,6 +138,7 @@ class _MosaicAppState extends State<MosaicApp> {
               brightness: _brightness,
               setMode: _setMode,
               toggleMode: _toggleMode,
+              cycleMode: _cycleMode,
               setBrightness: _setBrightness,
               toggleBrightness: _toggleBrightness,
               child: widget.transparentBackground
@@ -151,6 +166,7 @@ class MosaicAppScope extends InheritedWidget {
     required this.brightness,
     required this.setMode,
     required this.toggleMode,
+    required this.cycleMode,
     required this.setBrightness,
     required this.toggleBrightness,
     required super.child,
@@ -159,7 +175,13 @@ class MosaicAppScope extends InheritedWidget {
   final MosaicMode mode;
   final Brightness brightness;
   final void Function(MosaicMode mode) setMode;
+
+  /// Two-state metro ⇄ modern flip. Never selects aurora — see
+  /// [cycleMode] for a control that walks every mode.
   final void Function() toggleMode;
+
+  /// Advance through every [MosaicMode] in order, wrapping at the end.
+  final void Function() cycleMode;
   final void Function(Brightness brightness) setBrightness;
   final void Function() toggleBrightness;
 
