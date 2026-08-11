@@ -3,8 +3,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mosaic_ui/mosaic_ui.dart';
 
 Widget _wrap(Widget child) => MosaicTheme.test(
-      child: Directionality(textDirection: TextDirection.ltr, child: child),
-    );
+  child: Directionality(textDirection: TextDirection.ltr, child: child),
+);
 
 void main() {
   testWidgets('renders the label', (tester) async {
@@ -13,10 +13,9 @@ void main() {
   });
 
   testWidgets('error tone uses the error color token', (tester) async {
-    await tester.pumpWidget(_wrap(const MosaicBadge(
-      label: '3',
-      tone: MosaicBadgeTone.error,
-    )));
+    await tester.pumpWidget(
+      _wrap(const MosaicBadge(label: '3', tone: MosaicBadgeTone.error)),
+    );
     final container = tester.widget<Container>(find.byType(Container));
     final decoration = container.decoration as BoxDecoration;
     final tokens = MosaicTokens.metro();
@@ -25,11 +24,15 @@ void main() {
 
   testWidgets('color override beats tone', (tester) async {
     const override = Color(0xFFAABBCC);
-    await tester.pumpWidget(_wrap(const MosaicBadge(
-      label: 'X',
-      tone: MosaicBadgeTone.error,
-      color: override,
-    )));
+    await tester.pumpWidget(
+      _wrap(
+        const MosaicBadge(
+          label: 'X',
+          tone: MosaicBadgeTone.error,
+          color: override,
+        ),
+      ),
+    );
     final container = tester.widget<Container>(find.byType(Container));
     final decoration = container.decoration as BoxDecoration;
     expect(decoration.color, override);
@@ -39,9 +42,9 @@ void main() {
     await tester.pumpWidget(_wrap(const MosaicBadge.dot()));
     expect(find.byType(Text), findsNothing);
     final container = tester.widget<Container>(find.byType(Container));
-    expect(container.constraints, const BoxConstraints.tightFor(
-      width: 8,
-      height: 8,
-    ));
+    expect(
+      container.constraints,
+      const BoxConstraints.tightFor(width: 8, height: 8),
+    );
   });
 }

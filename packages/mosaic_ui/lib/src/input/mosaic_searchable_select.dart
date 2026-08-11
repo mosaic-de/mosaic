@@ -209,10 +209,7 @@ class _SearchablePanelState<T> extends State<_SearchablePanel<T>> {
             SizedBox(height: tokens.spacing.md),
             Flexible(
               child: filtered.isEmpty
-                  ? const MosaicEmptyState(
-                      title: 'No matches',
-                      glyph: '⌕',
-                    )
+                  ? const MosaicEmptyState(title: 'No matches', glyph: '⌕')
                   : MosaicList(
                       shrinkWrap: true,
                       rows: [

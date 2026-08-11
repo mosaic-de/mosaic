@@ -51,7 +51,8 @@ class _MosaicLiveSourcePauserState extends State<MosaicLiveSourcePauser>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    final shouldPause = state == AppLifecycleState.paused ||
+    final shouldPause =
+        state == AppLifecycleState.paused ||
         state == AppLifecycleState.hidden ||
         (widget.pauseOnInactive && state == AppLifecycleState.inactive);
     if (shouldPause) {

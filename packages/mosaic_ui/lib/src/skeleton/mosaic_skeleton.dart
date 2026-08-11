@@ -11,12 +11,7 @@ import '../theme/mosaic_theme.dart';
 /// motion scale: when set to zero the widget renders the muted base
 /// color statically so goldens don't flake on tick boundaries.
 class MosaicSkeleton extends StatefulWidget {
-  const MosaicSkeleton({
-    super.key,
-    this.width,
-    this.height,
-    this.radius,
-  });
+  const MosaicSkeleton({super.key, this.width, this.height, this.radius});
 
   /// Convenience: a single-line text-shaped skeleton.
   const MosaicSkeleton.line({
@@ -27,12 +22,9 @@ class MosaicSkeleton extends StatefulWidget {
   });
 
   /// Convenience: a square avatar-shaped skeleton.
-  const MosaicSkeleton.avatar({
-    super.key,
-    double size = 36,
-    this.radius,
-  })  : width = size,
-        height = size;
+  const MosaicSkeleton.avatar({super.key, double size = 36, this.radius})
+    : width = size,
+      height = size;
 
   final double? width;
   final double? height;

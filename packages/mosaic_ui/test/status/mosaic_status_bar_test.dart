@@ -3,15 +3,14 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mosaic_ui/mosaic_ui.dart';
 
 Widget _wrap(Widget child) => MosaicTheme.test(
-      child: Directionality(textDirection: TextDirection.ltr, child: child),
-    );
+  child: Directionality(textDirection: TextDirection.ltr, child: child),
+);
 
 void main() {
   testWidgets('renders title and caption', (tester) async {
-    await tester.pumpWidget(_wrap(const MosaicStatusBar(
-      title: 'Wallet',
-      caption: 'jonny',
-    )));
+    await tester.pumpWidget(
+      _wrap(const MosaicStatusBar(title: 'Wallet', caption: 'jonny')),
+    );
     expect(find.text('Wallet'), findsOneWidget);
     expect(find.text('jonny'), findsOneWidget);
   });
@@ -23,10 +22,14 @@ void main() {
   });
 
   testWidgets('renders trailing slot', (tester) async {
-    await tester.pumpWidget(_wrap(const MosaicStatusBar(
-      title: 'Hello',
-      trailing: MosaicBadge(label: 'NEW'),
-    )));
+    await tester.pumpWidget(
+      _wrap(
+        const MosaicStatusBar(
+          title: 'Hello',
+          trailing: MosaicBadge(label: 'NEW'),
+        ),
+      ),
+    );
     expect(find.text('NEW'), findsOneWidget);
   });
 }

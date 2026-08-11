@@ -28,9 +28,7 @@ class MosaicProgressBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tokens = MosaicTheme.of(context);
-    final radius = BorderRadius.circular(
-      tokens.isMetro ? 0 : (height / 2),
-    );
+    final radius = BorderRadius.circular(tokens.isMetro ? 0 : (height / 2));
     final fill = color ?? tokens.color.accent;
     final track = trackColor ?? tokens.color.surfaceActive;
     return ClipRRect(

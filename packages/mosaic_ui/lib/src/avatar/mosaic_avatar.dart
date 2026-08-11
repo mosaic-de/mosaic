@@ -56,10 +56,7 @@ class MosaicAvatar extends StatelessWidget {
     if (child != null) {
       body = child!;
     } else if (name != null && name!.trim().isNotEmpty) {
-      body = Text(
-        _initials(name!),
-        style: _initialsStyle(tokens, size, fg),
-      );
+      body = Text(_initials(name!), style: _initialsStyle(tokens, size, fg));
     } else {
       body = const SizedBox.shrink();
     }

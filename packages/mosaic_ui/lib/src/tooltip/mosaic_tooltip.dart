@@ -73,8 +73,9 @@ class _MosaicTooltipState extends State<MosaicTooltip> {
               ),
               decoration: BoxDecoration(
                 color: tokens.color.textPrimary,
-                borderRadius:
-                    BorderRadius.circular(tokens.radius.input.toDouble()),
+                borderRadius: BorderRadius.circular(
+                  tokens.radius.input.toDouble(),
+                ),
               ),
               child: Text(
                 widget.message,

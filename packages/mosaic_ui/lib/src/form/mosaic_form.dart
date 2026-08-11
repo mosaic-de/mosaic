@@ -58,11 +58,7 @@ class MosaicFormController extends ChangeNotifier {
 /// [MosaicFormScope]. [MosaicFormField]s register themselves with the
 /// controller so [MosaicFormController.validate] sees the full set.
 class MosaicForm extends StatefulWidget {
-  const MosaicForm({
-    super.key,
-    required this.controller,
-    required this.child,
-  });
+  const MosaicForm({super.key, required this.controller, required this.child});
 
   final MosaicFormController controller;
   final Widget child;
@@ -74,10 +70,7 @@ class MosaicForm extends StatefulWidget {
 class _MosaicFormState extends State<MosaicForm> {
   @override
   Widget build(BuildContext context) {
-    return MosaicFormScope(
-      controller: widget.controller,
-      child: widget.child,
-    );
+    return MosaicFormScope(controller: widget.controller, child: widget.child);
   }
 }
 
@@ -92,8 +85,7 @@ class MosaicFormScope extends InheritedWidget {
   final MosaicFormController controller;
 
   static MosaicFormController of(BuildContext context) {
-    final scope =
-        context.dependOnInheritedWidgetOfExactType<MosaicFormScope>();
+    final scope = context.dependOnInheritedWidgetOfExactType<MosaicFormScope>();
     assert(scope != null, 'No MosaicFormScope in context.');
     return scope!.controller;
   }
@@ -125,7 +117,8 @@ class MosaicFormField<T> extends StatefulWidget {
     T? value,
     void Function(T? value) setValue,
     String? error,
-  ) builder;
+  )
+  builder;
 
   @override
   State<MosaicFormField<T>> createState() => _MosaicFormFieldState<T>();
@@ -141,8 +134,11 @@ class _MosaicFormFieldState<T> extends State<MosaicFormField<T>> {
     if (!identical(next, _controller)) {
       _controller = next;
       if (widget.initialValue != null) {
-        next.set<T>(widget.name, widget.initialValue,
-            validator: widget.validator);
+        next.set<T>(
+          widget.name,
+          widget.initialValue,
+          validator: widget.validator,
+        );
       } else {
         next.register<T>(widget.name, widget.validator);
       }

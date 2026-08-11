@@ -40,10 +40,11 @@ class MosaicSnackbarScope {
   final _MosaicSnackbarHostState _host;
 
   static MosaicSnackbarScope of(BuildContext context) {
-    final host = context
-        .findAncestorStateOfType<_MosaicSnackbarHostState>();
-    assert(host != null,
-        'No MosaicSnackbarHost in context. Wrap your screen in one.');
+    final host = context.findAncestorStateOfType<_MosaicSnackbarHostState>();
+    assert(
+      host != null,
+      'No MosaicSnackbarHost in context. Wrap your screen in one.',
+    );
     return MosaicSnackbarScope._(host!);
   }
 
@@ -56,11 +57,13 @@ class MosaicSnackbarScope {
     String? actionLabel,
     VoidCallback? onAction,
   }) {
-    _host._enqueue(label,
-        tone: tone,
-        duration: duration,
-        actionLabel: actionLabel,
-        onAction: onAction);
+    _host._enqueue(
+      label,
+      tone: tone,
+      duration: duration,
+      actionLabel: actionLabel,
+      onAction: onAction,
+    );
   }
 
   void dismiss() => _host._dismissCurrent();
@@ -69,10 +72,7 @@ class MosaicSnackbarScope {
 /// Hosts a transient snackbar overlay above its [child]. Place near the
 /// root of your screen so messages float above tiles, panels, etc.
 class MosaicSnackbarHost extends StatefulWidget {
-  const MosaicSnackbarHost({
-    super.key,
-    required this.child,
-  });
+  const MosaicSnackbarHost({super.key, required this.child});
 
   final Widget child;
 
@@ -93,14 +93,16 @@ class _MosaicSnackbarHostState extends State<MosaicSnackbarHost> {
     VoidCallback? onAction,
   }) {
     setState(() {
-      _queue.add(_SnackbarMessage(
-        id: _nextId++,
-        label: label,
-        tone: tone,
-        duration: duration,
-        actionLabel: actionLabel,
-        onAction: onAction,
-      ));
+      _queue.add(
+        _SnackbarMessage(
+          id: _nextId++,
+          label: label,
+          tone: tone,
+          duration: duration,
+          actionLabel: actionLabel,
+          onAction: onAction,
+        ),
+      );
     });
     if (_queue.length == 1) _arm();
   }
@@ -221,7 +223,8 @@ class _SnackbarBody extends StatelessWidget {
     );
   }
 
-  static Color _toneColor(MosaicTokens tokens, MosaicSnackbarTone tone) => switch (tone) {
+  static Color _toneColor(MosaicTokens tokens, MosaicSnackbarTone tone) =>
+      switch (tone) {
         MosaicSnackbarTone.info => tokens.color.accent,
         MosaicSnackbarTone.success => tokens.color.success,
         MosaicSnackbarTone.warning => tokens.color.warning,

@@ -20,25 +20,34 @@ const _options = <MosaicSelectOption<String>>[
 
 void main() {
   testWidgets('shows placeholder when value is null', (tester) async {
-    await tester.pumpWidget(_wrap(MosaicSearchableSelect<String>(
-      value: null,
-      options: _options,
-      onChanged: (_) {},
-      placeholder: 'Pick a country',
-    )));
+    await tester.pumpWidget(
+      _wrap(
+        MosaicSearchableSelect<String>(
+          value: null,
+          options: _options,
+          onChanged: (_) {},
+          placeholder: 'Pick a country',
+        ),
+      ),
+    );
     await tester.pumpAndSettle();
     expect(find.text('Pick a country'), findsOneWidget);
   });
 
-  testWidgets('opens panel; typing filters list; selecting fires onChanged',
-      (tester) async {
+  testWidgets('opens panel; typing filters list; selecting fires onChanged', (
+    tester,
+  ) async {
     String? picked;
-    await tester.pumpWidget(_wrap(MosaicSearchableSelect<String>(
-      value: null,
-      options: _options,
-      onChanged: (v) => picked = v,
-      title: 'Country',
-    )));
+    await tester.pumpWidget(
+      _wrap(
+        MosaicSearchableSelect<String>(
+          value: null,
+          options: _options,
+          onChanged: (v) => picked = v,
+          title: 'Country',
+        ),
+      ),
+    );
     await tester.pumpAndSettle();
     await tester.tap(find.byType(MosaicSearchableSelect<String>));
     await tester.pumpAndSettle();
@@ -60,11 +69,15 @@ void main() {
   });
 
   testWidgets('empty state shows when no options match', (tester) async {
-    await tester.pumpWidget(_wrap(MosaicSearchableSelect<String>(
-      value: null,
-      options: _options,
-      onChanged: (_) {},
-    )));
+    await tester.pumpWidget(
+      _wrap(
+        MosaicSearchableSelect<String>(
+          value: null,
+          options: _options,
+          onChanged: (_) {},
+        ),
+      ),
+    );
     await tester.pumpAndSettle();
     await tester.tap(find.byType(MosaicSearchableSelect<String>));
     await tester.pumpAndSettle();

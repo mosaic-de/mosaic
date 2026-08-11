@@ -3,33 +3,37 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mosaic_ui/mosaic_ui.dart';
 
 Widget _wrap(Widget child) => MosaicTheme.test(
-      child: Directionality(textDirection: TextDirection.ltr, child: child),
-    );
+  child: Directionality(textDirection: TextDirection.ltr, child: child),
+);
 
 void main() {
   testWidgets('lint banner renders mode and brightness', (tester) async {
-    await tester.pumpWidget(_wrap(
-      const MosaicLint(child: SizedBox(width: 100, height: 100)),
-    ));
+    await tester.pumpWidget(
+      _wrap(const MosaicLint(child: SizedBox(width: 100, height: 100))),
+    );
     expect(find.textContaining('mosaic.lint'), findsOneWidget);
     expect(find.textContaining('metro'), findsOneWidget);
   });
 
   testWidgets('disabled lint is a passthrough', (tester) async {
-    await tester.pumpWidget(_wrap(
-      const MosaicLint(
-        enabled: false,
-        child: SizedBox(width: 100, height: 100),
+    await tester.pumpWidget(
+      _wrap(
+        const MosaicLint(
+          enabled: false,
+          child: SizedBox(width: 100, height: 100),
+        ),
       ),
-    ));
+    );
     expect(find.textContaining('mosaic.lint'), findsNothing);
   });
 
   testWidgets('lint without theme is a passthrough', (tester) async {
-    await tester.pumpWidget(const Directionality(
-      textDirection: TextDirection.ltr,
-      child: MosaicLint(child: SizedBox(width: 100, height: 100)),
-    ));
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: MosaicLint(child: SizedBox(width: 100, height: 100)),
+      ),
+    );
     expect(find.textContaining('mosaic.lint'), findsNothing);
   });
 

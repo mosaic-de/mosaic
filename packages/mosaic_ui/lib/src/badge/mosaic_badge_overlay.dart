@@ -48,19 +48,23 @@ class MosaicBadgeOverlay extends StatelessWidget {
       children: [
         child,
         Positioned(
-          top: position == MosaicBadgePosition.topRight ||
+          top:
+              position == MosaicBadgePosition.topRight ||
                   position == MosaicBadgePosition.topLeft
               ? offset
               : null,
-          bottom: position == MosaicBadgePosition.bottomRight ||
+          bottom:
+              position == MosaicBadgePosition.bottomRight ||
                   position == MosaicBadgePosition.bottomLeft
               ? offset
               : null,
-          left: position == MosaicBadgePosition.topLeft ||
+          left:
+              position == MosaicBadgePosition.topLeft ||
                   position == MosaicBadgePosition.bottomLeft
               ? offset
               : null,
-          right: position == MosaicBadgePosition.topRight ||
+          right:
+              position == MosaicBadgePosition.topRight ||
                   position == MosaicBadgePosition.bottomRight
               ? offset
               : null,

@@ -35,7 +35,8 @@ class MosaicStatusBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tokens = MosaicTheme.of(context);
-    final pad = padding ??
+    final pad =
+        padding ??
         EdgeInsets.symmetric(
           horizontal: tokens.spacing.lg,
           vertical: tokens.spacing.md,

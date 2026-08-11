@@ -52,11 +52,9 @@ class MosaicDraggable<T extends Object> extends StatelessWidget {
   Widget build(BuildContext context) {
     final tokens = MosaicTheme.of(context);
     final fb = feedback ?? Opacity(opacity: 0.85, child: child);
-    final placeholder = childWhenDragging ??
-        Opacity(
-          opacity: 0.4,
-          child: IgnorePointer(child: child),
-        );
+    final placeholder =
+        childWhenDragging ??
+        Opacity(opacity: 0.4, child: IgnorePointer(child: child));
     // When the drag gesture is disabled, render the child raw — the
     // host's own taps / long-presses on the tile must continue to
     // work. Wrapping in AbsorbPointer (or IgnorePointer) here would

@@ -3,11 +3,11 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mosaic_ui/mosaic_ui.dart';
 
 Widget _wrap(Widget child) => MosaicTheme.test(
-      child: Directionality(
-        textDirection: TextDirection.ltr,
-        child: Center(child: child),
-      ),
-    );
+  child: Directionality(
+    textDirection: TextDirection.ltr,
+    child: Center(child: child),
+  ),
+);
 
 void main() {
   testWidgets('renders at the configured size', (tester) async {
@@ -23,9 +23,7 @@ void main() {
   });
 
   testWidgets('avatar variant is square', (tester) async {
-    await tester.pumpWidget(
-      _wrap(const MosaicSkeleton.avatar(size: 48)),
-    );
+    await tester.pumpWidget(_wrap(const MosaicSkeleton.avatar(size: 48)));
     final box = tester.widget<SizedBox>(
       find.byWidgetPredicate(
         (w) => w is SizedBox && w.width == 48 && w.height == 48,
@@ -35,9 +33,7 @@ void main() {
   });
 
   testWidgets('does not throw when motion is disabled', (tester) async {
-    await tester.pumpWidget(
-      _wrap(const MosaicSkeleton(width: 80, height: 80)),
-    );
+    await tester.pumpWidget(_wrap(const MosaicSkeleton(width: 80, height: 80)));
     await tester.pump();
     expect(tester.takeException(), isNull);
   });

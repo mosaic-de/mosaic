@@ -69,9 +69,11 @@ class MosaicReorderableGrid extends StatelessWidget {
                 Positioned(
                   left: placements[i].col * (cell + g),
                   top: placements[i].row * (cell + g),
-                  width: placements[i].tile.size.cols * cell +
+                  width:
+                      placements[i].tile.size.cols * cell +
                       (placements[i].tile.size.cols - 1) * g,
-                  height: placements[i].tile.size.rows * cell +
+                  height:
+                      placements[i].tile.size.rows * cell +
                       (placements[i].tile.size.rows - 1) * g,
                   child: _ReorderSlot(
                     index: i,

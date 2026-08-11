@@ -22,8 +22,10 @@ class MosaicFolderTile extends StatelessWidget implements MosaicTileWidget {
     required this.onOpen,
     this.count,
     this.onLongPress,
-  })  : assert(previews.length <= 4,
-            'MosaicFolderTile shows at most 4 previews; pass count for the total.');
+  }) : assert(
+         previews.length <= 4,
+         'MosaicFolderTile shows at most 4 previews; pass count for the total.',
+       );
 
   final String label;
   final List<Widget> previews;

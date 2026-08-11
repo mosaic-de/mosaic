@@ -3,25 +3,31 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mosaic_ui/mosaic_ui.dart';
 
 Widget _wrap(Widget child) => MosaicTheme.test(
-      child: Directionality(
-        textDirection: TextDirection.ltr,
-        child: MosaicSnackbarHost(child: child),
+  child: Directionality(
+    textDirection: TextDirection.ltr,
+    child: MosaicSnackbarHost(child: child),
+  ),
+);
+
+void main() {
+  testWidgets('show renders the message and dismisses after duration', (
+    tester,
+  ) async {
+    late BuildContext captured;
+    await tester.pumpWidget(
+      _wrap(
+        Builder(
+          builder: (ctx) {
+            captured = ctx;
+            return const SizedBox.expand();
+          },
+        ),
       ),
     );
 
-void main() {
-  testWidgets('show renders the message and dismisses after duration',
-      (tester) async {
-    late BuildContext captured;
-    await tester.pumpWidget(_wrap(Builder(builder: (ctx) {
-      captured = ctx;
-      return const SizedBox.expand();
-    })));
-
-    MosaicSnackbarScope.of(captured).show(
-      'Saved',
-      duration: const Duration(milliseconds: 200),
-    );
+    MosaicSnackbarScope.of(
+      captured,
+    ).show('Saved', duration: const Duration(milliseconds: 200));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 50));
     expect(find.text('Saved'), findsOneWidget);
@@ -31,14 +37,19 @@ void main() {
     expect(find.text('Saved'), findsNothing);
   });
 
-  testWidgets('action button fires callback and dismisses',
-      (tester) async {
+  testWidgets('action button fires callback and dismisses', (tester) async {
     var pressed = false;
     late BuildContext captured;
-    await tester.pumpWidget(_wrap(Builder(builder: (ctx) {
-      captured = ctx;
-      return const SizedBox.expand();
-    })));
+    await tester.pumpWidget(
+      _wrap(
+        Builder(
+          builder: (ctx) {
+            captured = ctx;
+            return const SizedBox.expand();
+          },
+        ),
+      ),
+    );
 
     MosaicSnackbarScope.of(captured).show(
       'Removed',

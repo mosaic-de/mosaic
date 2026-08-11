@@ -44,8 +44,8 @@ class MosaicImage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tokens = MosaicTheme.of(context);
-    final radius = borderRadius ??
-        BorderRadius.circular(tokens.radius.tile.toDouble());
+    final radius =
+        borderRadius ?? BorderRadius.circular(tokens.radius.tile.toDouble());
     final body = bytes != null
         ? Image.memory(
             bytes!,
@@ -53,11 +53,8 @@ class MosaicImage extends StatelessWidget {
             height: height,
             fit: fit,
             gaplessPlayback: true,
-            errorBuilder: (_, __, ___) => _ErrorBox(
-              width: width,
-              height: height,
-              radius: radius,
-            ),
+            errorBuilder: (_, __, ___) =>
+                _ErrorBox(width: width, height: height, radius: radius),
           )
         : Image.network(
             url!,
@@ -72,11 +69,8 @@ class MosaicImage extends StatelessWidget {
                 radius: radius.topLeft.x,
               );
             },
-            errorBuilder: (_, __, ___) => _ErrorBox(
-              width: width,
-              height: height,
-              radius: radius,
-            ),
+            errorBuilder: (_, __, ___) =>
+                _ErrorBox(width: width, height: height, radius: radius),
           );
     return Semantics(
       label: semanticLabel,

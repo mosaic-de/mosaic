@@ -5,10 +5,7 @@ import 'package:mosaic_ui/mosaic_ui.dart';
 Widget _wrap(Widget child, {Brightness brightness = Brightness.dark}) {
   return MosaicTheme.test(
     brightness: brightness,
-    child: Directionality(
-      textDirection: TextDirection.ltr,
-      child: child,
-    ),
+    child: Directionality(textDirection: TextDirection.ltr, child: child),
   );
 }
 
@@ -25,8 +22,7 @@ void main() {
     expect(txt.style!.fontSize, tokens.typography.body.fontSize);
   });
 
-  testWidgets('display constructor maps to display typography',
-      (tester) async {
+  testWidgets('display constructor maps to display typography', (tester) async {
     await tester.pumpWidget(_wrap(const MosaicText.display('big')));
     final txt = tester.widget<Text>(find.text('big'));
     final tokens = MosaicTokens.metro();

@@ -64,19 +64,18 @@ class _MosaicContextMenuState extends State<MosaicContextMenu> {
     final origin = renderBox.localToGlobal(Offset.zero);
 
     _entry = OverlayEntry(
-      builder: (overlayContext) =>
-          _MenuOverlay(
-            anchorRect: Rect.fromLTWH(
-              origin.dx,
-              origin.dy,
-              size.width,
-              size.height,
-            ),
-            actions: widget.actions,
-            preferAbove: widget.preferAbove,
-            onClose: _close,
-            tokens: MosaicTheme.of(context),
-          ),
+      builder: (overlayContext) => _MenuOverlay(
+        anchorRect: Rect.fromLTWH(
+          origin.dx,
+          origin.dy,
+          size.width,
+          size.height,
+        ),
+        actions: widget.actions,
+        preferAbove: widget.preferAbove,
+        onClose: _close,
+        tokens: MosaicTheme.of(context),
+      ),
     );
     overlay.insert(_entry!);
   }
@@ -167,8 +166,9 @@ class _ActionRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tokens = MosaicTheme.of(context);
-    final color =
-        action.destructive ? tokens.color.error : tokens.color.textPrimary;
+    final color = action.destructive
+        ? tokens.color.error
+        : tokens.color.textPrimary;
     return MosaicPressFeedback(
       onPressed: () {
         action.onPressed();
@@ -185,10 +185,7 @@ class _ActionRow extends StatelessWidget {
             if (action.glyph != null) ...[
               Text(
                 action.glyph!,
-                style: tokens.typography.body.copyWith(
-                  color: color,
-                  height: 1,
-                ),
+                style: tokens.typography.body.copyWith(color: color, height: 1),
               ),
               SizedBox(width: tokens.spacing.sm),
             ],
