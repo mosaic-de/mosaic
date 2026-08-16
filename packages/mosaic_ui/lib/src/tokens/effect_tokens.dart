@@ -21,6 +21,8 @@ class MosaicEffectTokens {
     this.strokeWidth = 0,
     this.strokeOpacity = 0,
     this.scrimOpacity = 0.32,
+    this.saturation = 1.0,
+    this.sheenOpacity = 0,
   });
 
   /// Backdrop blur sigma behind tile / panel surfaces. Zero disables the
@@ -50,6 +52,25 @@ class MosaicEffectTokens {
   /// Alpha of the dimming scrim painted behind modal overlays.
   final double scrimOpacity;
 
+  /// Saturation multiplier applied to the blurred backdrop, 1.0 being
+  /// untouched.
+  ///
+  /// This is the difference between frosted glass and grey fog. Blur
+  /// alone averages neighbouring pixels, which pulls everything toward
+  /// the mean and drains colour; pushing saturation back up afterwards
+  /// is what makes the wallpaper still read as *that* wallpaper through
+  /// the pane. Apple's material does the same thing, and its absence is
+  /// the usual reason a hand-rolled glass effect looks muddy.
+  final double saturation;
+
+  /// Alpha of the top-edge sheen — a short vertical white gradient over
+  /// the surface, brightest at the top edge.
+  ///
+  /// Real glass catches light on the edge that faces it. Without this a
+  /// translucent panel reads as a flat tinted hole rather than a solid
+  /// object with a surface.
+  final double sheenOpacity;
+
   /// True when this token set asks for any non-opaque rendering. Lets
   /// widgets take the cheap path without inspecting six fields.
   bool get isGlass => surfaceBlur > 0 || overlayBlur > 0 || surfaceOpacity < 1;
@@ -62,6 +83,8 @@ class MosaicEffectTokens {
     double? strokeWidth,
     double? strokeOpacity,
     double? scrimOpacity,
+    double? saturation,
+    double? sheenOpacity,
   }) {
     return MosaicEffectTokens(
       surfaceBlur: surfaceBlur ?? this.surfaceBlur,
@@ -71,6 +94,8 @@ class MosaicEffectTokens {
       strokeWidth: strokeWidth ?? this.strokeWidth,
       strokeOpacity: strokeOpacity ?? this.strokeOpacity,
       scrimOpacity: scrimOpacity ?? this.scrimOpacity,
+      saturation: saturation ?? this.saturation,
+      sheenOpacity: sheenOpacity ?? this.sheenOpacity,
     );
   }
 
@@ -84,7 +109,9 @@ class MosaicEffectTokens {
         other.overlayOpacity == overlayOpacity &&
         other.strokeWidth == strokeWidth &&
         other.strokeOpacity == strokeOpacity &&
-        other.scrimOpacity == scrimOpacity;
+        other.scrimOpacity == scrimOpacity &&
+        other.saturation == saturation &&
+        other.sheenOpacity == sheenOpacity;
   }
 
   @override
@@ -96,5 +123,7 @@ class MosaicEffectTokens {
     strokeWidth,
     strokeOpacity,
     scrimOpacity,
+    saturation,
+    sheenOpacity,
   );
 }

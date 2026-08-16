@@ -80,6 +80,36 @@ void main() {
       expect(effect.strokeOpacity, greaterThan(0));
     });
 
+    test('restores saturation and lights the top edge', () {
+      // The two that separate real glass from grey fog. Blur averages
+      // neighbouring pixels and drains colour, so saturation must be
+      // pushed back *above* parity; and a pane with no lit edge reads
+      // as a tinted hole rather than an object.
+      final effect = MosaicTokens.aurora().effect;
+      expect(effect.saturation, greaterThan(1.0));
+      expect(effect.sheenOpacity, greaterThan(0));
+    });
+
+    test('blur is heavy enough to read as frosted, not smudged', () {
+      expect(
+        MosaicTokens.aurora().effect.surfaceBlur,
+        greaterThanOrEqualTo(24),
+      );
+    });
+
+    test('the pane is mostly backdrop, not mostly tint', () {
+      final effect = MosaicTokens.aurora().effect;
+      expect(effect.surfaceOpacity, lessThan(0.65));
+    });
+
+    test('light glass takes a stronger sheen than dark', () {
+      // Inverse of the stroke rule: a white sheen barely registers on a
+      // light surface, while on dark it would blow out.
+      final dark = MosaicTokens.aurora().effect;
+      final light = MosaicTokens.aurora(brightness: Brightness.light).effect;
+      expect(light.sheenOpacity, greaterThan(dark.sheenOpacity));
+    });
+
     test('leaves structure alone — spacing and columns match metro', () {
       final aurora = MosaicTokens.aurora();
       final metro = MosaicTokens.metro();

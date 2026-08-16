@@ -79,19 +79,43 @@ that work entirely in the other two modes.
 radius.tile: 20px
 radius.panel: 28px
 elevation.tile: 2      panel: 8      overlay: 16
-effect.surfaceBlur: 18       overlayBlur: 32
-effect.surfaceOpacity: 0.62 dark / 0.72 light
-effect.strokeWidth: 1        strokeOpacity: 0.12 dark / 0.07 light
+effect.surfaceBlur: 32       overlayBlur: 52
+effect.surfaceOpacity: 0.46 dark / 0.58 light
+effect.strokeWidth: 1        strokeOpacity: 0.18 dark / 0.10 light
+effect.saturation: 1.7
+effect.sheenOpacity: 0.10 dark / 0.16 light
 motion: longer, easeOutCubic
 grid: still strict — margin and gutter widen, columns do not
 ```
 
-Two asymmetries are deliberate. Dark glass takes a brighter hairline
-than light glass, because on a dark backdrop a faint edge disappears and
-the pane reads as a smudge. And the gutter widens while the column count
-does not: translucent panes need air between them or their blurred edges
-bleed together, but changing columns would be a structural change and
-modes do not get to do that.
+### The four parts of glass
+
+Blur and transparency alone produce fog, not glass. All four of these
+are load-bearing, and dropping any one is the usual reason a hand-rolled
+material looks muddy:
+
+```text
+heavy blur      32+, not 15 — a light blur reads as a smudge
+low fill        the pane is mostly backdrop, not mostly tint
+saturation      pushed back above 1.0, because blur averages colour out
+lit top edge    so the pane has a surface instead of being a hole
+```
+
+Saturation is composed *inside* the blur — `ImageFilter.compose` applies
+`inner` first, so the matrix runs on the raw backdrop and the blur on
+its result. Saturating afterwards would amplify the averaged, muddy
+colour rather than the original.
+
+Three asymmetries are deliberate:
+
+- **Dark glass takes a brighter hairline than light glass.** On a dark
+  backdrop a faint edge disappears and the pane reads as a smudge.
+- **Light glass takes a stronger sheen than dark** — the inverse, since
+  a white highlight barely registers on a light surface and blows out on
+  a dark one.
+- **The gutter widens while the column count does not.** Translucent
+  panes need air between them or their blurred edges bleed together, but
+  changing columns would be structural, and modes do not get to do that.
 
 ## Hard Rule
 

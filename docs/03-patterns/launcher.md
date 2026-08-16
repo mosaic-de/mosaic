@@ -52,6 +52,14 @@ Three rules earned by removing what did not work:
   cover are filled from most-used apps, recomputed every build and never
   persisted. Long-press promotes one to a real pinned tile — which is
   how a user keeps the ones they want.
+- **The stagger has to be seeded.** A hole is one cell by definition, so
+  hole-filling can only ever produce 1×1s. Seed a uniform spine and the
+  grid packs into a plain matrix with a straight edge down the side, and
+  no amount of filling afterwards recovers the rhythm. The seed lays
+  ranked apps against a repeating size pattern of **seven** entries —
+  seven because a period that divides the column count lines the anchors
+  up into columns and produces stripes on exactly the 4-, 5- and 6-wide
+  grids that phones use.
 
 Overflow is not an error: tiles that cannot be placed at any size stay
 in the drawer.
@@ -67,20 +75,35 @@ a folder that forgot to close.
 
 ### ink
 
-Editorial index. A pinned glance block — clock, date, unread count,
-installed count — over a typographic list of apps: pinned first, then
-everything else alphabetically, with live state as inline metadata on
-the right rail. No tiles, no icons, no surfaces; a hairline rule carries
-the hierarchy that a tile grid gets from colour.
+Editorial index. A pinned glance block over a typographic list of apps:
+pinned first, then everything else alphabetically, with live state as
+inline metadata on the right rail. No tiles, no icons, no surfaces; a
+hairline rule carries the hierarchy that a tile grid gets from colour.
+
+The glance reads, in order: **next calendar events**, **next alarm**,
+**unread count**, **battery**. Upcoming events lead because they are the
+only line about the future and the most likely to change what someone
+does in the next minute. Battery only takes the accent colour below 15%
+and off charge — a row that is always coloured has stopped being a
+signal.
+
+Calendar comes from `CalendarContract.Instances`, not `Events`: `Events`
+stores a recurrence rule rather than occurrences, so a weekly standup
+would surface once at its original date and never again. The alarm is
+`AlarmManager.getNextAlarmClock()`, which needs no permission and
+reports the system-wide next alarm — so it works whether it was set in
+Mosaic Clock or the OEM one.
 
 The one layout that scrolls, and only below the glance block. An index
 of 200 apps cannot be capped at a viewport and remain an index, but the
 part you *look* at still never moves — only the part you search through
 does.
 
-Only real data appears in the glance. There is no battery or weather
-row, because the surface has no channel for either, and a plausible
-number that is not real is worse than an absent one.
+Only real data appears in the glance, and each source states its own
+absence: "clear" when the calendar is readable and empty, "tap to
+allow" when the permission is missing, and no alarm row at all when
+nothing is scheduled. Those are three different facts and they must not
+render as the same blank.
 
 ## Widgets
 

@@ -73,6 +73,48 @@ class MosaicSurface extends StatelessWidget {
 
     final borderRadius = radius == 0 ? null : BorderRadius.circular(radius);
 
+    Widget? body = child;
+    if (effect.sheenOpacity > 0) {
+      // Light catches the top edge. Painted inside the surface rather
+      // than as a border so it fades out instead of ending on a line,
+      // and behind the child so it never tints content.
+      body = Stack(
+        fit: StackFit.passthrough,
+        // Non-directional on purpose. Stack's default is
+        // AlignmentDirectional.topStart, which asserts on a missing
+        // Directionality ancestor — and MosaicSurface is a primitive
+        // that must render anywhere, including in tests and tooling
+        // that never wrap a WidgetsApp. The sheen is symmetric, so
+        // there is nothing for a text direction to decide here.
+        alignment: Alignment.topLeft,
+        children: [
+          Positioned.fill(
+            child: IgnorePointer(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  borderRadius: borderRadius,
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      const Color(
+                        0xFFFFFFFF,
+                      ).withValues(alpha: effect.sheenOpacity),
+                      const Color(0x00FFFFFF),
+                    ],
+                    // Falls off fast: a sheen reaching halfway down the
+                    // pane reads as a gradient fill, not as reflection.
+                    stops: const [0.0, 0.45],
+                  ),
+                ),
+              ),
+            ),
+          ),
+          if (child != null) child!,
+        ],
+      );
+    }
+
     final container = Container(
       padding: padding,
       alignment: alignment,
@@ -82,7 +124,7 @@ class MosaicSurface extends StatelessWidget {
         border: border,
         boxShadow: elevation > 0 ? [_subtleShadow(elevation)] : null,
       ),
-      child: child,
+      child: body,
     );
 
     if (blur <= 0) return container;
@@ -93,10 +135,44 @@ class MosaicSurface extends StatelessWidget {
     return ClipRRect(
       borderRadius: borderRadius ?? BorderRadius.zero,
       child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: blur, sigmaY: blur),
+        filter: _backdropFilter(blur, effect.saturation),
         child: container,
       ),
     );
+  }
+
+  /// Blur, then push saturation back up.
+  ///
+  /// Order matters and this is the wrong way round from how it reads:
+  /// `compose` applies `inner` first, so the saturation matrix runs on
+  /// the raw backdrop and the blur runs on the result. That is what we
+  /// want — saturating after blurring would amplify the averaged, muddy
+  /// colour rather than the original.
+  static ImageFilter _backdropFilter(double blur, double saturation) {
+    final blurFilter = ImageFilter.blur(sigmaX: blur, sigmaY: blur);
+    if (saturation == 1.0) return blurFilter;
+    return ImageFilter.compose(
+      outer: blurFilter,
+      inner: ColorFilter.matrix(_saturationMatrix(saturation)),
+    );
+  }
+
+  /// Standard saturation matrix. Luminance coefficients are Rec. 709,
+  /// matching what the compositor already uses, so a fully desaturated
+  /// result is the same grey the platform would produce.
+  static List<double> _saturationMatrix(double s) {
+    const lumR = 0.2126;
+    const lumG = 0.7152;
+    const lumB = 0.0722;
+    final r = (1 - s) * lumR;
+    final g = (1 - s) * lumG;
+    final b = (1 - s) * lumB;
+    return <double>[
+      r + s, g, b, 0, 0, //
+      r, g + s, b, 0, 0, //
+      r, g, b + s, 0, 0, //
+      0, 0, 0, 1, 0, //
+    ];
   }
 
   Color _resolveColor(MosaicTokens tokens) {

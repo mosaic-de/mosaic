@@ -121,16 +121,28 @@ class MosaicTokens {
         input: 14,
       ),
       elevation: const MosaicElevationTokens(tile: 2, panel: 8, overlay: 16),
+      // Tuned against Apple's material rather than "a blur with some
+      // transparency". Four things separate the two, and dropping any
+      // one of them is what makes hand-rolled glass look like fog:
+      //
+      //   * heavy blur — 30+, not 15; a light blur reads as a smudge
+      //   * low fill — the pane is mostly backdrop, not mostly tint
+      //   * saturation pushed back up, because blur averages colour out
+      //   * a lit top edge, so the pane has a surface and not just a hole
       effect: MosaicEffectTokens(
-        surfaceBlur: 18,
-        overlayBlur: 32,
-        surfaceOpacity: brightness == Brightness.dark ? 0.62 : 0.72,
-        overlayOpacity: brightness == Brightness.dark ? 0.80 : 0.88,
+        surfaceBlur: 32,
+        overlayBlur: 52,
+        surfaceOpacity: brightness == Brightness.dark ? 0.46 : 0.58,
+        overlayOpacity: brightness == Brightness.dark ? 0.66 : 0.76,
         strokeWidth: 1,
         // Dark glass needs a brighter edge to separate from the backdrop;
         // light glass needs a fainter one or the hairline reads as a border.
-        strokeOpacity: brightness == Brightness.dark ? 0.12 : 0.07,
+        strokeOpacity: brightness == Brightness.dark ? 0.18 : 0.10,
         scrimOpacity: 0.44,
+        // Overshoot 1.0 — the blur has already drained the backdrop, so
+        // restoring it needs more than parity to look like the original.
+        saturation: 1.7,
+        sheenOpacity: brightness == Brightness.dark ? 0.10 : 0.16,
       ),
       motion: MosaicMotionTokens(
         press: const Duration(milliseconds: 140),
