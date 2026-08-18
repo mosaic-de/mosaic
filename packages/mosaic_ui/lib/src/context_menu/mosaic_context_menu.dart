@@ -3,6 +3,7 @@ import 'package:flutter/widgets.dart';
 import '../press/mosaic_press_feedback.dart';
 import '../surface/mosaic_panel.dart';
 import '../theme/mosaic_theme.dart';
+import '../tokens/mosaic_tokens.dart';
 
 /// One row in a context menu.
 @immutable
@@ -115,44 +116,65 @@ class _MenuOverlay extends StatelessWidget {
   final List<MosaicContextAction> actions;
   final bool preferAbove;
   final VoidCallback onClose;
-  final dynamic tokens;
+
+  /// Tokens captured at the call site, where a [MosaicTheme] is in
+  /// scope. Typed, not `dynamic` — the previous `dynamic` is what let
+  /// this field sit unused without the compiler minding.
+  final MosaicTokens tokens;
 
   @override
   Widget build(BuildContext context) {
-    final t = MosaicTheme.of(context);
+    // Reinstall the captured theme over the whole overlay subtree.
+    //
+    // This build runs inside the Overlay's context, and the Overlay is
+    // created by WidgetsApp *above* the point where MosaicApp installs
+    // MosaicTheme (inside `home:`). So there is no MosaicTheme ancestor
+    // here: this widget read `MosaicTheme.of(context)` and asserted,
+    // and so did every Mosaic component beneath it — MosaicPanel,
+    // MosaicPressFeedback, MosaicText. Passing `tokens` down by hand
+    // would fix this widget and leave all of those still broken, so the
+    // theme goes back into the tree instead and they all resolve.
+    final t = tokens;
     final approxHeight = actions.length * 44.0 + t.spacing.sm * 2;
     final left = anchorRect.left;
     final top = preferAbove
         ? (anchorRect.top - approxHeight - t.spacing.sm)
         : (anchorRect.bottom + t.spacing.sm);
-    return Stack(
-      children: [
-        Positioned.fill(
-          child: GestureDetector(
-            behavior: HitTestBehavior.opaque,
-            onTap: onClose,
-            child: const ColoredBox(color: Color(0x66000000)),
-          ),
-        ),
-        Positioned(
-          left: left,
-          top: top.clamp(0.0, double.infinity),
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 240),
-            child: MosaicPanel(
-              padding: EdgeInsets.symmetric(vertical: t.spacing.xs),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  for (final action in actions)
-                    _ActionRow(action: action, onAfter: onClose),
-                ],
+    return MosaicTheme(
+      tokens: t,
+      child: Stack(
+        children: [
+          Positioned.fill(
+            child: GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: onClose,
+              child: ColoredBox(
+                color: const Color(
+                  0xFF000000,
+                ).withValues(alpha: t.effect.scrimOpacity),
               ),
             ),
           ),
-        ),
-      ],
+          Positioned(
+            left: left,
+            top: top.clamp(0.0, double.infinity),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 240),
+              child: MosaicPanel(
+                padding: EdgeInsets.symmetric(vertical: t.spacing.xs),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    for (final action in actions)
+                      _ActionRow(action: action, onAfter: onClose),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
