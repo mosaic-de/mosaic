@@ -1,0 +1,21 @@
+<!--
+  Mosaic Comms — phone, contacts and SMS.
+
+  A speech bubble with a squared-off tail. The tail is what stops it
+  reading as a plain panel, and it has to be a rectangle: the usual
+  triangular tail is a diagonal, and this language is axis-aligned only.
+
+  Three dots rather than message lines, so it is not confused with the
+  Notes page.
+
+  Keep in sync with COMMS_BASE / COMMS_INK in
+  tools/render_brand_icons.py, which is what actually generates the PNGs.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" fill="none">
+  <rect x="8" y="14" width="80" height="54" fill="#6366F1"/>
+  <rect x="20" y="68" width="18" height="14" fill="#6366F1"/>
+
+  <rect x="19" y="34" width="14" height="14" fill="#FFFFFF"/>
+  <rect x="41" y="34" width="14" height="14" fill="#FFFFFF" fill-opacity="0.85"/>
+  <rect x="63" y="34" width="14" height="14" fill="#FFFFFF" fill-opacity="0.7"/>
+</svg>

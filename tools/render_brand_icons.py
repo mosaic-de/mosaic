@@ -93,10 +93,71 @@ FILES_INK = [
     (52, 42, 26, 28, 0.55),
 ]
 
+# Notes: a page with written lines. The lines are unequal on purpose —
+# a stack of equal bars reads as a list or a menu, while a short last
+# line reads as prose that stopped mid-sentence.
+NOTES_BASE = [(12, 6, 72, 84, 1.00)]
+NOTES_INK = [
+    (26, 22, 30, 10, 1.00),  # heading, shorter and heavier
+    (26, 42, 44, 8, 0.80),
+    (26, 56, 44, 8, 0.80),
+    (26, 70, 26, 8, 0.60),  # trailing part-line
+]
+
+# Calculator: display strip over a keypad. Six keys, not nine — at
+# 48 px mdpi a 3x3 grid of keys closes up into a texture, and the point
+# is that it reads as *keys* rather than as a grid.
+CALC_BASE = [(6, 6, 84, 84, 1.00)]
+CALC_INK = [
+    (18, 18, 60, 16, 1.00),  # display
+    (18, 44, 16, 14, 0.90),
+    (40, 44, 16, 14, 0.90),
+    (62, 44, 16, 14, 0.90),
+    (18, 64, 16, 14, 0.70),
+    (40, 64, 16, 14, 0.70),
+    (62, 64, 16, 14, 0.70),
+]
+
+# Comms: a speech bubble with a squared-off tail. The tail is what
+# stops it reading as a plain panel, and it has to be a rectangle —
+# the usual triangular tail is a diagonal, which this language does not
+# have. Three dots rather than message lines, so it is not confused
+# with the Notes page.
+COMMS_BASE = [
+    (8, 14, 80, 54, 1.00),  # bubble
+    (20, 68, 18, 14, 1.00),  # tail
+]
+COMMS_INK = [
+    (19, 34, 14, 14, 1.00),
+    (41, 34, 14, 14, 0.85),
+    (63, 34, 14, 14, 0.70),
+]
+
+# Gallery: two stacked photos, the rear one dimmed and offset so the
+# stack reads as more than one image, with a sun over a horizon inside
+# the front one.
+#
+# The horizon runs flush to the front photo's left, right and bottom
+# edges. An earlier version inset it, and a floating bar under a small
+# square stops being a landscape and starts being a form field with a
+# label. Meeting the edges is what makes it ground.
+GALLERY_BASE = [
+    (30, 6, 60, 48, 0.55),  # photo behind
+    (6, 26, 68, 64, 1.00),  # photo in front
+]
+GALLERY_INK = [
+    (16, 36, 16, 16, 1.00),  # sun
+    (6, 70, 68, 20, 0.88),  # horizon, flush to three edges
+]
+
 MARKS: dict[str, tuple[list, list]] = {
     "mosaic": (MOSAIC_BASE, []),
     "clock": (CLOCK_BASE, CLOCK_INK),
     "files": (FILES_BASE, FILES_INK),
+    "notes": (NOTES_BASE, NOTES_INK),
+    "calculator": (CALC_BASE, CALC_INK),
+    "comms": (COMMS_BASE, COMMS_INK),
+    "gallery": (GALLERY_BASE, GALLERY_INK),
 }
 
 # Launcher rainbow: same tessellation, but each rect carries its own
@@ -119,12 +180,21 @@ WHITE = (0xFF, 0xFF, 0xFF)
 BACKGROUND_HEX = "#0B0B0C"
 
 # (path, mark name, accent rgb). "rainbow" is special-cased.
+#
+# Every app gets its own hue as well as its own geometry. Colour alone
+# was the original mistake — with one shared mark, apps were told apart
+# only by hue, which is exactly what fails at 48 px on a crowded home
+# screen and fails completely for anyone who cannot distinguish them.
 APP_DIRS: list[tuple[str, str, tuple[int, int, int] | None]] = [
     ("examples/wallet_demo", "mosaic", (0xF5, 0x9E, 0x0B)),
     ("examples/weather_demo", "mosaic", (0x3B, 0x82, 0xF6)),
     ("apps/mosaic_launcher", "rainbow", None),
-    ("apps/mosaic_clock", "clock", (0xEF, 0x44, 0x44)),
-    ("apps/mosaic_file_manager", "files", (0x10, 0xB9, 0x81)),
+    ("apps/mosaic_clock", "clock", (0xEF, 0x44, 0x44)),  # red
+    ("apps/mosaic_file_manager", "files", (0x10, 0xB9, 0x81)),  # green
+    ("apps/mosaic_notes", "notes", (0xEA, 0xB3, 0x08)),  # yellow
+    ("apps/mosaic_calculator", "calculator", (0x8B, 0x5C, 0xF6)),  # violet
+    ("apps/mosaic_comms", "comms", (0x63, 0x66, 0xF1)),  # indigo
+    ("apps/mosaic_gallery", "gallery", (0xEC, 0x48, 0x99)),  # pink
 ]
 
 DPIS = {

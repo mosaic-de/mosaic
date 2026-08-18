@@ -1,0 +1,21 @@
+<!--
+  Mosaic Gallery.
+
+  Two stacked photos — the rear one dimmed and offset so the stack reads
+  as more than one image — with a sun over a horizon inside the front.
+
+  The horizon runs flush to the front photo's left, right and bottom
+  edges. An earlier version inset it, and a floating bar beneath a small
+  square stops being a landscape and starts being a form field with a
+  label. Meeting the edges is what makes it ground.
+
+  Keep in sync with GALLERY_BASE / GALLERY_INK in
+  tools/render_brand_icons.py, which is what actually generates the PNGs.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" fill="none">
+  <rect x="30" y="6" width="60" height="48" fill="#EC4899" fill-opacity="0.55"/>
+  <rect x="6" y="26" width="68" height="64" fill="#EC4899"/>
+
+  <rect x="16" y="36" width="16" height="16" fill="#FFFFFF"/>
+  <rect x="6" y="70" width="68" height="20" fill="#FFFFFF" fill-opacity="0.88"/>
+</svg>

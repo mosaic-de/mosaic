@@ -1,0 +1,21 @@
+<!--
+  Mosaic Notes.
+
+  A page with written lines. The lines are deliberately unequal: a stack
+  of equal bars reads as a list or a menu, while a heavier heading and a
+  short trailing line read as prose that stopped mid-sentence.
+
+  Distinct from the Files mark, which is a folder tab over two solid
+  sheets — thin bars versus blocks is what separates them at 48px.
+
+  Keep in sync with NOTES_BASE / NOTES_INK in
+  tools/render_brand_icons.py, which is what actually generates the PNGs.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" fill="none">
+  <rect x="12" y="6" width="72" height="84" fill="#EAB308"/>
+
+  <rect x="26" y="22" width="30" height="10" fill="#FFFFFF"/>
+  <rect x="26" y="42" width="44" height="8" fill="#FFFFFF" fill-opacity="0.8"/>
+  <rect x="26" y="56" width="44" height="8" fill="#FFFFFF" fill-opacity="0.8"/>
+  <rect x="26" y="70" width="26" height="8" fill="#FFFFFF" fill-opacity="0.6"/>
+</svg>
