@@ -41,6 +41,7 @@ export 'src/input/mosaic_tag_input.dart';
 export 'src/input/mosaic_time_picker.dart';
 export 'src/input/mosaic_toggle.dart';
 export 'src/list/mosaic_list.dart';
+export 'src/mode/mosaic_brightness_choice.dart';
 export 'src/mode/mosaic_mode.dart';
 export 'src/motion/mosaic_state_switcher.dart';
 export 'src/notification/mosaic_notification_card.dart';
